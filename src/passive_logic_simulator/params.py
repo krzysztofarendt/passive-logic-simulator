@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+"""Typed parameter sets for the physical model."""
+
 from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
 class CollectorParams:
+    """Collector model parameters."""
+
     area_m2: float
     heat_removal_factor: float  # F_R [-]
     optical_efficiency: float  # eta0 [-]
@@ -13,6 +17,8 @@ class CollectorParams:
 
 @dataclass(frozen=True)
 class TankParams:
+    """Tank model parameters and initial conditions."""
+
     mass_kg: float
     cp_j_kgk: float
     ua_w_k: float  # UAtank [W/K]
@@ -22,11 +28,15 @@ class TankParams:
 
 @dataclass(frozen=True)
 class PumpParams:
+    """Pump/loop parameters."""
+
     mass_flow_kg_s: float  # m_dot [kg/s] when on
 
 
 @dataclass(frozen=True)
 class ControlParams:
+    """Controller settings for the pump."""
+
     enabled: bool = True
     delta_t_on_k: float = 2.0
     delta_t_off_k: float = 1.0
@@ -35,6 +45,8 @@ class ControlParams:
 
 @dataclass(frozen=True)
 class SimulationParams:
+    """Simulation timeline and fixed-step integration settings."""
+
     t0_s: float
     dt_s: float
     duration_s: float

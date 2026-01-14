@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Pump control logic (hysteresis / deadband)."""
+
 from passive_logic_simulator.params import CollectorParams, ControlParams, PumpParams, TankParams
 from passive_logic_simulator.physics import collector_outlet_k, collector_useful_heat_w
 
@@ -15,12 +17,20 @@ def update_pump_state(
     tank: TankParams,
     control: ControlParams,
 ) -> bool:
+    """Update pump state using a hysteresis controller.
+
+    The controller:
+    - Requires minimum irradiance before the pump can run.
+    - Computes a nominal collector outlet temperature assuming the pump is on.
+    - Uses ON/OFF deadband thresholds to avoid rapid switching.
+    """
     if not control.enabled:
         return True
 
     if irradiance_w_m2 < control.min_irradiance_w_m2:
         return False
 
+    # Nominal collector output assumes circulation at the design mass flow rate.
     q_u_nom_w = collector_useful_heat_w(
         t_in_k=t_tank_k,
         t_amb_outdoor_k=t_amb_outdoor_k,
@@ -35,5 +45,7 @@ def update_pump_state(
     )
 
     if pump_on:
+        # When already on, use the OFF threshold (smaller temperature lift required to stay on).
         return t_out_nom_k > t_tank_k + control.delta_t_off_k
+    # When off, require a larger temperature lift to turn on.
     return t_out_nom_k > t_tank_k + control.delta_t_on_k

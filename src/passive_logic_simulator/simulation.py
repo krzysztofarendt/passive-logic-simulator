@@ -1,5 +1,13 @@
 from __future__ import annotations
 
+"""Top-level simulation orchestration.
+
+This module wires together:
+- weather inputs (`G(t)`, `T_amb(t)`)
+- pump hysteresis control (updated once per step)
+- RK4 fixed-step integration of the single tank state `T_tank`
+"""
+
 from dataclasses import dataclass
 
 from passive_logic_simulator.config import SimulationConfig
@@ -11,6 +19,8 @@ from passive_logic_simulator.weather import build_weather
 
 @dataclass(frozen=True)
 class SimulationResult:
+    """Time series produced by the simulator (suitable for plotting/export)."""
+
     times_s: list[float]
     tank_temperature_k: list[float]
     ambient_temperature_k: list[float]
@@ -19,6 +29,7 @@ class SimulationResult:
 
 
 def run_simulation(config: SimulationConfig) -> SimulationResult:
+    """Run a transient simulation and return the full trajectory."""
     weather = build_weather(config.weather)
 
     times_s: list[float] = []
@@ -31,6 +42,8 @@ def run_simulation(config: SimulationConfig) -> SimulationResult:
     t_tank_k = config.tank.initial_temperature_k
     pump_on = False
 
+    # Fixed-step integration; `pump_on` is updated once per step and held constant
+    # during all RK4 sub-stages for that step (per README/AGENTS conventions).
     n_steps = int(config.sim.duration_s // config.sim.dt_s)
     for step in range(n_steps + 1):
         g = weather.irradiance_w_m2(t_s)
@@ -60,6 +73,7 @@ def run_simulation(config: SimulationConfig) -> SimulationResult:
         t_room_k = config.tank.room_temperature_k
 
         def rhs(local_t_s: float, local_t_tank_k: float) -> float:
+            # Within a step, the pump state is constant; weather inputs can vary with time.
             local_g = weather.irradiance_w_m2(local_t_s)
             local_t_amb_k = weather.ambient_temperature_k(local_t_s)
 

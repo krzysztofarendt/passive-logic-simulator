@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+"""Load simulation configuration from TOML.
+
+The config file is designed to be front-end friendly (simple scalar fields and
+tables), so it can be mirrored later in a web UI and sent to a backend.
+"""
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -18,6 +24,8 @@ from passive_logic_simulator.weather import CsvWeatherConfig, SyntheticWeatherCo
 
 @dataclass(frozen=True)
 class SimulationConfig:
+    """Fully specified configuration for a simulation run."""
+
     collector: CollectorParams
     tank: TankParams
     pump: PumpParams
@@ -27,12 +35,14 @@ class SimulationConfig:
 
 
 def _require_mapping(value: Any, *, key_path: str) -> dict[str, Any]:
+    """Validate that a TOML value is a table (dict-like mapping)."""
     if not isinstance(value, dict):
         raise ValueError(f"Expected table at '{key_path}', got {type(value).__name__}")
     return value
 
 
 def _get_float(table: dict[str, Any], key: str, *, default: float | None = None, key_path: str) -> float:
+    """Read a float from a TOML table, with basic type validation."""
     if key in table:
         value = table[key]
         if isinstance(value, (int, float)):
@@ -44,6 +54,7 @@ def _get_float(table: dict[str, Any], key: str, *, default: float | None = None,
 
 
 def _get_bool(table: dict[str, Any], key: str, *, default: bool | None = None, key_path: str) -> bool:
+    """Read a boolean from a TOML table, with basic type validation."""
     if key in table:
         value = table[key]
         if isinstance(value, bool):
@@ -55,6 +66,7 @@ def _get_bool(table: dict[str, Any], key: str, *, default: bool | None = None, k
 
 
 def _get_str(table: dict[str, Any], key: str, *, default: str | None = None, key_path: str) -> str:
+    """Read a string from a TOML table, with basic type validation."""
     if key in table:
         value = table[key]
         if isinstance(value, str):
@@ -66,6 +78,7 @@ def _get_str(table: dict[str, Any], key: str, *, default: str | None = None, key
 
 
 def _parse_weather(config: dict[str, Any], *, base_dir: Path) -> WeatherConfig:
+    """Parse the `[weather]` table into a concrete weather config."""
     weather_table = _require_mapping(config.get("weather", {}), key_path="weather")
     kind = _get_str(weather_table, "kind", default="synthetic", key_path="weather")
     if kind == "synthetic":
@@ -85,6 +98,7 @@ def _parse_weather(config: dict[str, Any], *, base_dir: Path) -> WeatherConfig:
         csv_path = Path(_get_str(weather_table, "csv_path", key_path="weather"))
         if not csv_path.is_absolute():
             csv_path = (base_dir / csv_path).resolve()
+        # Keep extrapolation modes explicit so a UI can present a finite set.
         extrapolation = _get_str(weather_table, "extrapolation", default="clamp", key_path="weather")
         if extrapolation not in {"clamp", "zero", "error"}:
             raise ValueError("weather.extrapolation must be one of: 'clamp', 'zero', 'error'")
@@ -101,6 +115,7 @@ def _parse_weather(config: dict[str, Any], *, base_dir: Path) -> WeatherConfig:
 
 
 def load_config(path: str | Path) -> SimulationConfig:
+    """Load a TOML file and convert it into a typed `SimulationConfig`."""
     path = Path(path)
     raw = tomllib.loads(path.read_text(encoding="utf-8"))
     root = _require_mapping(raw, key_path="root")

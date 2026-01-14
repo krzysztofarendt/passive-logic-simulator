@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Command-line interface for running the simulation and exporting results."""
+
 import argparse
 import csv
 from pathlib import Path
@@ -17,6 +19,7 @@ def _write_results_csv(
     irradiance_w_m2: list[float],
     pump_on: list[bool],
 ) -> None:
+    """Write simulation outputs to a CSV file suitable for plotting."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", newline="") as f:
         writer = csv.DictWriter(
@@ -50,6 +53,7 @@ def _write_results_csv(
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Create the CLI argument parser."""
     parser = argparse.ArgumentParser(prog="passive-logic-simulator")
     parser.add_argument(
         "--config",
@@ -67,6 +71,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> None:
+    """Run a configured simulation and write results to CSV."""
     parser = build_parser()
     args = parser.parse_args(argv)
 

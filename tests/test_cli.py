@@ -2,10 +2,13 @@ import csv
 import textwrap
 from pathlib import Path
 
-from passive_logic_simulator.cli import _write_results_csv, build_parser, main
+from passive_logic_simulator.cli import _write_results_csv, app
+from typer.testing import CliRunner
+
+runner = CliRunner()
 
 
-def test_write_results_csv(tmp_path) -> None:
+def test_write_results_csv(tmp_path: Path) -> None:
     out_path = tmp_path / "out.csv"
     _write_results_csv(
         out_path,
@@ -24,14 +27,14 @@ def test_write_results_csv(tmp_path) -> None:
     assert rows[1]["pump_on"] == "1"
 
 
-def test_build_parser_has_expected_args() -> None:
-    parser = build_parser()
-    args = parser.parse_args([])
-    assert isinstance(args.config, Path)
-    assert isinstance(args.output_csv, Path)
+def test_cli_has_expected_commands() -> None:
+    result = runner.invoke(app, ["--help"])
+    assert result.exit_code == 0
+    assert "run" in result.stdout
+    assert "demo" in result.stdout
 
 
-def test_cli_main_writes_csv(tmp_path, capsys) -> None:
+def test_cli_main_writes_csv(tmp_path: Path) -> None:
     config_path = tmp_path / "config.toml"
     output_csv = tmp_path / "simulation.csv"
     config_path.write_text(
@@ -55,7 +58,9 @@ def test_cli_main_writes_csv(tmp_path, capsys) -> None:
         encoding="utf-8",
     )
 
-    main(["--config", str(config_path), "--output-csv", str(output_csv)])
-    captured = capsys.readouterr().out
-    assert "Wrote" in captured
+    result = runner.invoke(
+        app, ["run", "--config", str(config_path), "--output-csv", str(output_csv)]
+    )
+    assert result.exit_code == 0
+    assert "Wrote" in result.stdout
     assert output_csv.exists()

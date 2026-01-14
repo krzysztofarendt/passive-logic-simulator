@@ -40,7 +40,7 @@ No formatter/linter is configured yet; if you introduce one (for example `ruff`)
 
 ## Testing Guidelines
 
-There is no test suite yet. When adding tests:
+Tests use `pytest` and live under `tests/`. When adding tests:
 
 - Use `pytest`.
 - Place tests under `tests/` and name files `test_*.py`.

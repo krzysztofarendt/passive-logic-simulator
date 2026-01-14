@@ -104,6 +104,7 @@ This project targets Python 3.12 and uses `uv`.
 ```bash
 uv sync
 uv run python main.py
+uv run pytest
 
 # or run the installed CLI entrypoint:
 uv run passive-logic-simulator --config resources/default_config.toml --output-csv out/simulation.csv

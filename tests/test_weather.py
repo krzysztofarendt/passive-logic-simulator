@@ -1,0 +1,53 @@
+import math
+
+import pytest
+
+from passive_logic_simulator.weather import (
+    CsvWeatherConfig,
+    SyntheticWeatherConfig,
+    ambient_sinusoid_k,
+    build_weather,
+    irradiance_clear_day_w_m2,
+)
+
+
+def test_irradiance_clear_day_is_zero_outside_window() -> None:
+    assert irradiance_clear_day_w_m2(0.0, sunrise_s=10.0, sunset_s=20.0, peak_w_m2=100.0) == 0.0
+    assert irradiance_clear_day_w_m2(25.0, sunrise_s=10.0, sunset_s=20.0, peak_w_m2=100.0) == 0.0
+
+
+def test_ambient_sinusoid_has_expected_mean_at_t0() -> None:
+    assert math.isclose(ambient_sinusoid_k(0.0, mean_k=300.0, amplitude_k=5.0, period_s=100.0), 305.0)
+
+
+def test_build_weather_synthetic() -> None:
+    w = build_weather(
+        SyntheticWeatherConfig(
+            sunrise_s=0.0,
+            sunset_s=10.0,
+            peak_irradiance_w_m2=100.0,
+            ambient_mean_k=300.0,
+            ambient_amplitude_k=0.0,
+            ambient_period_s=1.0,
+        )
+    )
+    assert w.irradiance_w_m2(-1.0) == 0.0
+    assert w.ambient_temperature_k(123.0) == 300.0
+
+
+def test_build_weather_csv(tmp_path) -> None:
+    csv_path = tmp_path / "weather.csv"
+    csv_path.write_text(
+        "time_s,irradiance_w_m2,ambient_k\n0,0,300\n10,10,310\n",
+        encoding="utf-8",
+    )
+    w = build_weather(CsvWeatherConfig(csv_path=csv_path))
+    assert w.irradiance_w_m2(5.0) == 5.0
+    assert w.ambient_temperature_k(5.0) == 305.0
+
+
+def test_build_weather_csv_requires_enough_rows(tmp_path) -> None:
+    csv_path = tmp_path / "weather.csv"
+    csv_path.write_text("time_s,irradiance_w_m2,ambient_k\n0,0,300\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="at least 2 rows"):
+        build_weather(CsvWeatherConfig(csv_path=csv_path))

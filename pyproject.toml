@@ -1,5 +1,5 @@
 [project]
-name = "passive-logic-simulator"
+name = "passive_logic_simulator"
 version = "0.1.0"
 description = "Simulation of a simple system: solar collector + pump + storage tank"
 readme = "README.md"
@@ -10,7 +10,8 @@ requires-python = ">=3.12"
 dependencies = []
 
 [project.scripts]
-passive-logic-simulator = "passive_logic_simulator:main"
+passive-logic-simulator = "passive_logic_simulator.cli:main"
+passive_logic_simulator = "passive_logic_simulator.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.9.4,<0.10.0"]

@@ -1,0 +1,43 @@
+[collector]
+area_m2 = 2.0
+heat_removal_factor = 0.9
+optical_efficiency = 0.75
+loss_coefficient_w_m2k = 5.0
+
+[tank]
+mass_kg = 200.0
+cp_j_kgk = 4180.0
+ua_w_k = 3.0
+initial_temperature_k = 293.15
+room_temperature_k = 293.15
+
+[pump]
+mass_flow_kg_s = 0.05
+
+[control]
+enabled = true
+delta_t_on_k = 2.0
+delta_t_off_k = 1.0
+min_irradiance_w_m2 = 25.0
+
+[simulation]
+t0_s = 0.0
+dt_s = 10.0
+duration_s = 86400.0
+
+[weather]
+kind = "synthetic"
+sunrise_s = 21600.0
+sunset_s = 64800.0
+peak_irradiance_w_m2 = 850.0
+ambient_mean_k = 293.15
+ambient_amplitude_k = 6.0
+ambient_period_s = 86400.0
+
+# For weather from file, set:
+# kind = "csv"
+# csv_path = "resources/weather.csv"
+# time_column = "time_s"
+# irradiance_column = "irradiance_w_m2"
+# ambient_column = "ambient_k"
+# extrapolation = "clamp" # or: "zero", "error"

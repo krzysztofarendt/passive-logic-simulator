@@ -1,43 +1,59 @@
-# CLAUDE.md
+# Repository Guidelines
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Project Structure & Module Organization
 
-## Project Overview
+- `src/passive_logic_simulator/` contains the simulation package code.
+- `main.py` is a thin runner that invokes the package CLI.
+- `pyproject.toml` defines project metadata and dependencies.
+- `uv.lock` and `.venv/` support reproducible environments via `uv`.
 
-passive-logic is a Python project using Python 3.12.
+Keep new simulation code inside the package and avoid growing `main.py`.
 
-It simulates a simple solar-thermal system (collector + pump loop + storage tank) without needing the original exercise screenshot.
+## Simulation Conventions
 
-## Development Setup
+- Model: solar collector → pumped loop → well-mixed storage tank (single state `T_tank`).
+- Units: **all temperatures are Kelvin**; keep parameters consistent with the units listed in `README.md`.
+- Control: pump uses hysteresis (`ΔT_on`, `ΔT_off`) and should not cool the tank (collector useful heat is clamped to `Q_u >= 0`).
+- Numerics: fixed-step **RK4**; pump state updates once per time step and is held constant within the RK4 sub-steps.
+- Weather inputs: `G(t)` and outdoor `T_amb(t)` can come from a synthetic model or a CSV time series.
+- Tank losses: use constant indoor/room temperature `T_room` (configurable) as the tank loss reference.
 
-This project uses `uv` for dependency management (indicated by pyproject.toml structure and .python-version file).
+## Build, Test, and Development Commands
 
-```bash
-# Install dependencies
-uv sync
+This repo targets Python 3.12 (see `.python-version`) and uses `uv` for dependency management.
 
-# Run the application (thin runner)
-uv run python main.py
+- `uv sync`: create/update the virtual environment from `pyproject.toml`/`uv.lock`.
+- `uv run python main.py`: run the application using the managed environment.
+- `uv run passive-logic-simulator --config resources/default_config.toml --output-csv out/simulation.csv`: run via the package CLI and write results to CSV.
+- `uv add <package>`: add a dependency and update the lockfile.
 
-# Run via the package CLI and export results
-uv run passive-logic-simulator --config resources/default_config.toml --output-csv out/simulation.csv
-```
+When tests exist:
+- `uv run pytest`: run the test suite.
 
-## Project Structure
+## Coding Style & Naming Conventions
 
-- `src/passive_logic_simulator/` - Simulation package (modular code)
-- `resources/default_config.toml` - Default simulation configuration
-- `main.py` - Thin runner that calls the package CLI
-- `pyproject.toml` - Project configuration and dependencies
+- Indentation: 4 spaces; follow PEP 8.
+- Naming: `snake_case` for functions/variables, `PascalCase` for classes, `UPPER_SNAKE_CASE` for constants.
+- Prefer explicit types for public functions and return values (type hints), and keep modules small and focused.
 
-## Simulation Summary (Decisions)
+No formatter/linter is configured yet; if you introduce one (for example `ruff`), apply it consistently and document the new command(s) here.
 
-- System: environment → **solar collector** → **pump/loop** → **storage tank** → return to collector.
-- State: tank modeled as **well-mixed** with a single temperature `T_tank(t)` (no stratification).
-- Units: **Kelvin for all temperatures**.
-- Collector model: useful heat `Q_u = A * F_R * (eta0 * G(t) - U_L * (T_in - T_amb))`, clamped to `Q_u >= 0` to avoid cooling the tank.
-- Pump control: hysteresis deadband (`ΔT_on`, `ΔT_off`) based on nominal collector outlet vs tank temperature; optional minimum irradiance.
-- Tank losses: lumped to a constant indoor/room temperature `T_room` (configurable).
-- Integration: fixed-step **RK4** on the tank ODE; pump state is updated once per time step and held constant within the RK4 sub-steps.
+## Testing Guidelines
 
-For the full equations and parameter definitions, see `README.md`.
+There is no test suite yet. When adding tests:
+
+- Use `pytest`.
+- Place tests under `tests/` and name files `test_*.py`.
+- Keep tests deterministic (no network calls; use fakes/fixtures where needed).
+
+## Commit & Pull Request Guidelines
+
+This repository has no established commit-message convention yet. Use a clear, consistent format such as Conventional Commits (e.g., `feat: add parser`, `fix: handle empty input`).
+
+For PRs:
+- Include a short description, how to run/verify changes, and any follow-ups or linked issues.
+- If behavior changes, add or update tests (or explain why not).
+
+## Security & Configuration Tips
+
+- Do not commit secrets. Use environment variables for configuration and keep local `.env` files untracked.

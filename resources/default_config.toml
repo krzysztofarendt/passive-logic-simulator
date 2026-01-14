@@ -37,6 +37,7 @@ ambient_period_s = 86400.0
 
 # For weather from file, set:
 # kind = "csv"
+# csv_path example: resources/templates/weather.csv
 # csv_path = "resources/weather.csv"
 # time_column = "time_s"
 # irradiance_column = "irradiance_w_m2"

@@ -90,6 +90,26 @@ The output CSV contains:
 - `irradiance_w_m2`
 - `pump_on` (0/1)
 
+### Synthetic weather (default)
+
+By default (`weather.kind = "synthetic"`), the simulator uses a simple, parameterized
+weather model intended for quick experiments (it does **not** model sun position):
+
+- **Solar irradiance** `G(t)` [W/m²]: `0` outside the interval `[sunrise_s, sunset_s]`,
+  and a smooth clear-day curve inside that window:
+
+  `x = (t_s - sunrise_s) / (sunset_s - sunrise_s)`
+
+  `G(t_s) = peak_irradiance_w_m2 * (1 - cos(pi * x)) / 2`
+
+- **Outdoor ambient temperature** `T_amb(t)` [K]: a cosine wave:
+
+  `T_amb(t_s) = ambient_mean_k + ambient_amplitude_k * cos(2*pi*t_s/ambient_period_s)`
+
+Notes:
+- `t_s` is the simulation time in seconds (see `simulation.t0_s` / `simulation.duration_s`).
+- Set `sunrise_s` / `sunset_s` to match your timeline (e.g., seconds since midnight for a 24h run).
+
 ### Weather from CSV
 
 Set `weather.kind = "csv"` and point `weather.csv_path` at a file with (by default) these columns:
@@ -97,6 +117,8 @@ Set `weather.kind = "csv"` and point `weather.csv_path` at a file with (by defau
 - `time_s`
 - `irradiance_w_m2`
 - `ambient_k`
+
+An example file is provided at `resources/templates/weather.csv`.
 
 ## Development
 

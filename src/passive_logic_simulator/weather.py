@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Weather input models.
 
 Two sources are supported:
@@ -7,12 +5,13 @@ Two sources are supported:
 - CSV time series with linear interpolation
 """
 
+from __future__ import annotations
+
+import csv
 from dataclasses import dataclass
 from math import cos, pi
 from pathlib import Path
 from typing import Protocol, TypeAlias
-
-import csv
 
 from passive_logic_simulator.time_series import ExtrapolationMode, TimeSeries
 

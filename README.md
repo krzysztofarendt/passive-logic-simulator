@@ -54,6 +54,7 @@ The system is integrated forward in time using a fixed-step 4th-order Runge–Ku
 - State: `T_tank(t)` [K]
 - Solver: RK4 with step `dt`
 - Switching: pump state updates once per step (hysteresis) and is held constant during the RK4 sub-stages; choose `dt` small enough (e.g., 1–30 s) to resolve switching cleanly.
+- For fixed-step RK4, `duration_s` should be an integer multiple of `dt_s`.
 
 ## Parameters (Units)
 

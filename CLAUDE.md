@@ -15,6 +15,7 @@ Keep new simulation code inside the package and avoid growing `main.py`.
 - Units: **all temperatures are Kelvin**; keep parameters consistent with the units listed in `README.md`.
 - Control: pump uses hysteresis (`ΔT_on`, `ΔT_off`) and should not cool the tank (collector useful heat is clamped to `Q_u >= 0`).
 - Numerics: fixed-step **RK4**; pump state updates once per time step and is held constant within the RK4 sub-steps.
+- Numerics: `duration_s` should be an integer multiple of `dt_s`.
 - Weather inputs: `G(t)` and outdoor `T_amb(t)` can come from a synthetic model or a CSV time series.
 - Tank losses: use constant indoor/room temperature `T_room` (configurable) as the tank loss reference.
 

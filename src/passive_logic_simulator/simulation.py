@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Top-level simulation orchestration.
 
 This module wires together:
@@ -8,6 +6,9 @@ This module wires together:
 - RK4 fixed-step integration of the single tank state `T_tank`
 """
 
+from __future__ import annotations
+
+import math
 from dataclasses import dataclass
 
 from passive_logic_simulator.config import SimulationConfig
@@ -44,7 +45,11 @@ def run_simulation(config: SimulationConfig) -> SimulationResult:
 
     # Fixed-step integration; `pump_on` is updated once per step and held constant
     # during all RK4 sub-stages for that step (per README/AGENTS conventions).
-    n_steps = int(config.sim.duration_s // config.sim.dt_s)
+    n_steps_float = config.sim.duration_s / config.sim.dt_s
+    n_steps = int(round(n_steps_float))
+    if not math.isclose(n_steps_float, n_steps, rel_tol=0.0, abs_tol=1e-12):
+        raise ValueError("simulation.duration_s must be an integer multiple of simulation.dt_s")
+
     for step in range(n_steps + 1):
         g = weather.irradiance_w_m2(t_s)
         t_amb_k = weather.ambient_temperature_k(t_s)
@@ -72,7 +77,13 @@ def run_simulation(config: SimulationConfig) -> SimulationResult:
         m_dot_kg_s = config.pump.mass_flow_kg_s if pump_on else 0.0
         t_room_k = config.tank.room_temperature_k
 
-        def rhs(local_t_s: float, local_t_tank_k: float) -> float:
+        def rhs(
+            local_t_s: float,
+            local_t_tank_k: float,
+            *,
+            m_dot_kg_s: float = m_dot_kg_s,
+            t_room_k: float = t_room_k,
+        ) -> float:
             # Within a step, the pump state is constant; weather inputs can vary with time.
             local_g = weather.irradiance_w_m2(local_t_s)
             local_t_amb_k = weather.ambient_temperature_k(local_t_s)

@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Numerical utilities used by the simulator."""
+
+from __future__ import annotations
 
 from collections.abc import Callable
 

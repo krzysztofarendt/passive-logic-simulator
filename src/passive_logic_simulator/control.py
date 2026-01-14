@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Pump control logic (hysteresis / deadband)."""
+
+from __future__ import annotations
 
 from passive_logic_simulator.params import CollectorParams, ControlParams, PumpParams, TankParams
 from passive_logic_simulator.physics import collector_outlet_k, collector_useful_heat_w

@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Command-line interface for running the simulation and exporting results."""
+
+from __future__ import annotations
 
 import argparse
 import csv
@@ -20,6 +20,16 @@ def _write_results_csv(
     pump_on: list[bool],
 ) -> None:
     """Write simulation outputs to a CSV file suitable for plotting."""
+    n = len(times_s)
+    lengths = {
+        "tank_temperature_k": len(tank_temperature_k),
+        "ambient_temperature_k": len(ambient_temperature_k),
+        "irradiance_w_m2": len(irradiance_w_m2),
+        "pump_on": len(pump_on),
+    }
+    if any(length != n for length in lengths.values()):
+        raise ValueError(f"Result series length mismatch: times_s={n}, {lengths}")
+
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", newline="") as f:
         writer = csv.DictWriter(
@@ -39,7 +49,6 @@ def _write_results_csv(
             ambient_temperature_k,
             irradiance_w_m2,
             pump_on,
-            strict=True,
         ):
             writer.writerow(
                 {

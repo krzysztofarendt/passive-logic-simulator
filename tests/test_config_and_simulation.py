@@ -88,3 +88,21 @@ def test_run_simulation_constant_inputs_matches_linear_solution(tmp_path) -> Non
     q_u_w = 100.0
     expected_final = 300.0 + (q_u_w / (config.tank.mass_kg * config.tank.cp_j_kgk)) * 10.0
     assert result.tank_temperature_k[-1] == pytest.approx(expected_final, abs=0.0)
+
+
+def test_run_simulation_requires_duration_multiple_of_dt(tmp_path) -> None:
+    config_toml = tmp_path / "config.toml"
+    config_toml.write_text(
+        textwrap.dedent(
+            """
+            [simulation]
+            dt_s = 0.3
+            duration_s = 1.0
+            """
+        ).strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    config = load_config(config_toml)
+    with pytest.raises(ValueError, match="duration_s must be an integer multiple"):
+        run_simulation(config)

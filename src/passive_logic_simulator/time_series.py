@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """
 Minimal time-series utilities used by the simulator.
 
@@ -7,6 +5,8 @@ The simulator needs to query weather inputs as functions of time, e.g. `G(t)` an
 `T_amb(t)`. This module provides a small, dependency-free helper for piecewise
 linear interpolation over a strictly increasing time grid.
 """
+
+from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Literal
@@ -74,7 +74,5 @@ class TimeSeries:
         v0 = self.values[lo]
         v1 = self.values[hi]
 
-        if t1 == t0:
-            return v0
         alpha = (t_s - t0) / (t1 - t0)
         return v0 + alpha * (v1 - v0)

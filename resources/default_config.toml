@@ -19,6 +19,7 @@ enabled = true
 delta_t_on_k = 2.0
 delta_t_off_k = 1.0
 min_irradiance_w_m2 = 25.0
+# Small cutoff to avoid running the pump at near-zero irradiance.
 
 [simulation]
 t0_s = 0.0

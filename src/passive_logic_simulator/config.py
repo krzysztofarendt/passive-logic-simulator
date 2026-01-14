@@ -1,10 +1,10 @@
-from __future__ import annotations
-
 """Load simulation configuration from TOML.
 
 The config file is designed to be front-end friendly (simple scalar fields and
 tables), so it can be mirrored later in a web UI and sent to a backend.
 """
+
+from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path

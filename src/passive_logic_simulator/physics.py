@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Physics/energy balance functions for the lumped-parameter model."""
+
+from __future__ import annotations
 
 from passive_logic_simulator.params import CollectorParams, TankParams
 

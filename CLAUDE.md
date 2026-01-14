@@ -16,13 +16,18 @@ This project uses `uv` for dependency management (indicated by pyproject.toml st
 # Install dependencies
 uv sync
 
-# Run the application
+# Run the application (thin runner)
 uv run python main.py
+
+# Run via the package CLI and export results
+uv run passive-logic-simulator --config resources/default_config.toml --output-csv out/simulation.csv
 ```
 
 ## Project Structure
 
-- `main.py` - Application entry point
+- `src/passive_logic_simulator/` - Simulation package (modular code)
+- `resources/default_config.toml` - Default simulation configuration
+- `main.py` - Thin runner that calls the package CLI
 - `pyproject.toml` - Project configuration and dependencies
 
 ## Simulation Summary (Decisions)
@@ -32,6 +37,7 @@ uv run python main.py
 - Units: **Kelvin for all temperatures**.
 - Collector model: useful heat `Q_u = A * F_R * (eta0 * G(t) - U_L * (T_in - T_amb))`, clamped to `Q_u >= 0` to avoid cooling the tank.
 - Pump control: hysteresis deadband (`ΔT_on`, `ΔT_off`) based on nominal collector outlet vs tank temperature; optional minimum irradiance.
+- Tank losses: lumped to a constant indoor/room temperature `T_room` (configurable).
 - Integration: fixed-step **RK4** on the tank ODE; pump state is updated once per time step and held constant within the RK4 sub-steps.
 
 For the full equations and parameter definitions, see `README.md`.

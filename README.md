@@ -17,7 +17,8 @@ Primary modeling assumptions (kept intentionally simple):
 - Tank is **well-mixed** (no stratification).
 - Working fluid has constant `c_p` and is single-phase.
 - No explicit pipe/heat-exchanger thermal mass; only tank stores energy.
-- Collector/tank losses are lumped to ambient via `U_L` and `UAtank`.
+- Collector losses are lumped to outdoor ambient via `U_L`.
+- Tank losses are lumped to an indoor/room temperature via `UAtank`.
 
 ## Modeling Approach (Lumped-Parameter)
 
@@ -39,7 +40,7 @@ Collector outlet temperature (pump on):
 
 Tank energy balance (well-mixed tank, loop return from tank):
 
-`dT_tank/dt = (m_dot/m_tank) * (T_out - T_tank) - (UAtank/(m_tank*c_p)) * (T_tank - T_amb)`
+`dT_tank/dt = (m_dot/m_tank) * (T_out - T_tank) - (UAtank/(m_tank*c_p)) * (T_tank - T_room)`
 
 Notes:
 - Clamp `Q_u >= 0` (or turn pump off) if the collector would remove heat from the tank.
@@ -63,13 +64,38 @@ The system is integrated forward in time using a fixed-step 4th-order Runge–Ku
 - `U_L` [W/(m²·K)]: collector overall heat-loss coefficient
 - `T_in` [K]: collector inlet fluid temperature (typically `T_tank`)
 - `T_out` [K]: collector outlet fluid temperature
-- `T_amb` [K]: ambient temperature
+- `T_amb` [K]: outdoor ambient temperature
+- `T_room` [K]: indoor/room temperature (tank loss reference)
 - `m_dot` [kg/s]: loop mass flow rate when pump is on
 - `c_p` [J/(kg·K)]: fluid specific heat capacity
 - `m_tank` [kg]: tank fluid mass (`≈ ρ * V`)
 - `UAtank` [W/K]: tank heat-loss coefficient times area (lumped)
 - `dt` [s]: numerical time step for simulation
 - `ΔT_on`, `ΔT_off` [K]: pump control deadband thresholds (optional)
+
+## Usage
+
+Edit parameters in `resources/default_config.toml` and run:
+
+```bash
+uv run passive-logic-simulator --config resources/default_config.toml --output-csv out/simulation.csv
+```
+
+The output CSV contains:
+
+- `time_s`
+- `tank_temperature_k`
+- `ambient_temperature_k`
+- `irradiance_w_m2`
+- `pump_on` (0/1)
+
+### Weather from CSV
+
+Set `weather.kind = "csv"` and point `weather.csv_path` at a file with (by default) these columns:
+
+- `time_s`
+- `irradiance_w_m2`
+- `ambient_k`
 
 ## Development
 

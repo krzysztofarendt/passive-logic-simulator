@@ -2,11 +2,12 @@
 
 ## Project Structure & Module Organization
 
-- `main.py` is the current entry point (simple script-style layout).
+- `src/passive_logic_simulator/` contains the simulation package code.
+- `main.py` is a thin runner that invokes the package CLI.
 - `pyproject.toml` defines project metadata and dependencies.
 - `uv.lock` and `.venv/` support reproducible environments via `uv`.
 
-If the project grows beyond a single file, prefer a package layout (for example `src/passive_logic/`) and keep `main.py` as a thin CLI/runner that imports from the package.
+Keep new simulation code inside the package and avoid growing `main.py`.
 
 ## Simulation Conventions
 
@@ -14,6 +15,8 @@ If the project grows beyond a single file, prefer a package layout (for example 
 - Units: **all temperatures are Kelvin**; keep parameters consistent with the units listed in `README.md`.
 - Control: pump uses hysteresis (`ΔT_on`, `ΔT_off`) and should not cool the tank (collector useful heat is clamped to `Q_u >= 0`).
 - Numerics: fixed-step **RK4**; pump state updates once per time step and is held constant within the RK4 sub-steps.
+- Weather inputs: `G(t)` and outdoor `T_amb(t)` can come from a synthetic model or a CSV time series.
+- Tank losses: use constant indoor/room temperature `T_room` (configurable) as the tank loss reference.
 
 ## Build, Test, and Development Commands
 
@@ -21,6 +24,7 @@ This repo targets Python 3.12 (see `.python-version`) and uses `uv` for dependen
 
 - `uv sync`: create/update the virtual environment from `pyproject.toml`/`uv.lock`.
 - `uv run python main.py`: run the application using the managed environment.
+- `uv run passive-logic-simulator --config resources/default_config.toml --output-csv out/simulation.csv`: run via the package CLI and write results to CSV.
 - `uv add <package>`: add a dependency and update the lockfile.
 
 When tests exist:

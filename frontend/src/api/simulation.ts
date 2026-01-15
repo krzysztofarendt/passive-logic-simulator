@@ -2,12 +2,19 @@
  * API client for the solar thermal simulation backend.
  */
 
-import type { SimulationConfig, SimulationResult } from "../types/simulation";
+import type {
+  SimulationConfig,
+  SimulationResult,
+  SolverName,
+  ErrorComparisonResult,
+  ErrorStatistics,
+} from "../types/simulation";
 
 const API_BASE_URL = "http://localhost:8000";
 
 export async function runSimulation(
-  config: SimulationConfig
+  config: SimulationConfig,
+  solver: SolverName = "rk4"
 ): Promise<SimulationResult> {
   let response: Response;
 
@@ -17,9 +24,9 @@ export async function runSimulation(
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(config),
+      body: JSON.stringify({ ...config, solver }),
     });
-  } catch (err) {
+  } catch {
     // Network errors (e.g., backend not running)
     throw new Error(
       `Cannot connect to simulation server at ${API_BASE_URL}. ` +
@@ -47,4 +54,71 @@ export async function runSimulation(
   }
 
   return result as SimulationResult;
+}
+
+/**
+ * Run both Euler and RK4 simulations and compute error metrics.
+ */
+export async function runComparison(
+  config: SimulationConfig
+): Promise<ErrorComparisonResult> {
+  // Run both simulations in parallel
+  const [rk4Result, eulerResult] = await Promise.all([
+    runSimulation(config, "rk4"),
+    runSimulation(config, "euler"),
+  ]);
+
+  // Compute point-by-point temperature errors
+  const temperatureError = rk4Result.tank_temperature_k.map(
+    (rk4Temp, i) => eulerResult.tank_temperature_k[i] - rk4Temp
+  );
+
+  // Compute cumulative energy error
+  // Energy = mass * cp * temperature
+  // We assume same mass and cp, so energy error is proportional to temp error
+  // E_error = m * cp * T_error (cumulative)
+  const massKg = config.tank.mass_kg;
+  const cpJKgK = config.tank.cp_j_kgk;
+
+  const energyError: number[] = [];
+  let cumulativeEnergy = 0;
+  for (let i = 0; i < temperatureError.length; i++) {
+    // Power difference = m * cp * dT/dt, but we integrate temp error directly
+    // Cumulative energy difference at time t = m * cp * (T_euler(t) - T_rk4(t))
+    // Actually, let's compute instantaneous energy rate error and integrate
+    if (i === 0) {
+      cumulativeEnergy = 0;
+    } else {
+      // Heat rate error = m * cp * (dT_euler/dt - dT_rk4/dt)
+      // Approximate by integrating temperature error * m * cp over time
+      // This gives thermal energy stored difference
+      cumulativeEnergy += temperatureError[i] * massKg * cpJKgK;
+    }
+    energyError.push(cumulativeEnergy);
+  }
+
+  // Compute statistics
+  const absErrors = temperatureError.map(Math.abs);
+  const maxAbsTempError = Math.max(...absErrors);
+  const meanTempError = temperatureError.reduce((a, b) => a + b, 0) / temperatureError.length;
+  const rmsError = Math.sqrt(
+    temperatureError.reduce((sum, e) => sum + e * e, 0) / temperatureError.length
+  );
+  const finalEnergyErrorKj = energyError[energyError.length - 1] / 1000;
+
+  const stats: ErrorStatistics = {
+    max_abs_temp_error_k: maxAbsTempError,
+    rms_temp_error_k: rmsError,
+    mean_temp_error_k: meanTempError,
+    final_energy_error_kj: finalEnergyErrorKj,
+  };
+
+  return {
+    times_s: rk4Result.times_s,
+    temperature_error_k: temperatureError,
+    energy_error_j: energyError,
+    rk4_temperature_k: rk4Result.tank_temperature_k,
+    euler_temperature_k: eulerResult.tank_temperature_k,
+    stats,
+  };
 }

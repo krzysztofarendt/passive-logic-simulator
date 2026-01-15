@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, memo } from "react";
 import type { SimulationConfig } from "../types/simulation";
+import { PARAMETER_HELP } from "../types/simulation";
+import { Tooltip } from "./Tooltip";
 
 interface ParameterFormProps {
   config: SimulationConfig;
@@ -17,6 +19,7 @@ interface InputFieldProps {
   max?: number;
   step?: number;
   unit?: string;
+  help?: string;
 }
 
 // Custom comparison: only re-render if value, label, or type changes (not onChange)
@@ -31,7 +34,8 @@ const inputFieldPropsAreEqual = (
     prev.unit === next.unit &&
     prev.min === next.min &&
     prev.max === next.max &&
-    prev.step === next.step
+    prev.step === next.step &&
+    prev.help === next.help
   );
 };
 
@@ -45,6 +49,7 @@ const InputField = memo(function InputField({
   max,
   step = 0.01,
   unit,
+  help,
 }: InputFieldProps) {
   // Local state for immediate UI response
   const [localValue, setLocalValue] = useState(String(value));
@@ -83,6 +88,7 @@ const InputField = memo(function InputField({
           className="w-4 h-4 rounded border-gray-300"
         />
         <span className="text-gray-700">{label}</span>
+        {help && <Tooltip text={help} />}
       </label>
     );
   }
@@ -92,6 +98,7 @@ const InputField = memo(function InputField({
       <span className="text-gray-700">
         {label}
         {unit && <span className="text-gray-400 ml-1">[{unit}]</span>}
+        {help && <Tooltip text={help} />}
       </span>
       <input
         type="number"
@@ -187,7 +194,7 @@ export function ParameterForm({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-4 h-full overflow-y-auto">
+    <div className="bg-white rounded-lg shadow p-4">
       <h2 className="text-lg font-bold text-gray-900 mb-4">
         Simulation Parameters
       </h2>
@@ -200,6 +207,7 @@ export function ParameterForm({
           onChange={(v) => updateCollector("area_m2", v as number)}
           min={0.1}
           step={0.1}
+          help={PARAMETER_HELP["collector.area_m2"]}
         />
         <InputField
           label="Heat Removal Factor"
@@ -209,6 +217,7 @@ export function ParameterForm({
           min={0}
           max={1}
           step={0.01}
+          help={PARAMETER_HELP["collector.heat_removal_factor"]}
         />
         <InputField
           label="Optical Efficiency"
@@ -218,6 +227,7 @@ export function ParameterForm({
           min={0}
           max={1}
           step={0.01}
+          help={PARAMETER_HELP["collector.optical_efficiency"]}
         />
         <InputField
           label="Loss Coefficient"
@@ -228,6 +238,7 @@ export function ParameterForm({
           }
           min={0}
           step={0.1}
+          help={PARAMETER_HELP["collector.loss_coefficient_w_m2k"]}
         />
       </Section>
 
@@ -239,6 +250,7 @@ export function ParameterForm({
           onChange={(v) => updateTank("mass_kg", v as number)}
           min={1}
           step={1}
+          help={PARAMETER_HELP["tank.mass_kg"]}
         />
         <InputField
           label="Specific Heat"
@@ -247,6 +259,7 @@ export function ParameterForm({
           onChange={(v) => updateTank("cp_j_kgk", v as number)}
           min={1}
           step={1}
+          help={PARAMETER_HELP["tank.cp_j_kgk"]}
         />
         <InputField
           label="Heat Loss UA"
@@ -255,6 +268,7 @@ export function ParameterForm({
           onChange={(v) => updateTank("ua_w_k", v as number)}
           min={0}
           step={0.1}
+          help={PARAMETER_HELP["tank.ua_w_k"]}
         />
         <InputField
           label="Initial Temperature"
@@ -263,6 +277,7 @@ export function ParameterForm({
           onChange={(v) => updateTank("initial_temperature_k", v as number)}
           min={0}
           step={0.1}
+          help={PARAMETER_HELP["tank.initial_temperature_k"]}
         />
         <InputField
           label="Room Temperature"
@@ -271,6 +286,7 @@ export function ParameterForm({
           onChange={(v) => updateTank("room_temperature_k", v as number)}
           min={0}
           step={0.1}
+          help={PARAMETER_HELP["tank.room_temperature_k"]}
         />
       </Section>
 
@@ -282,6 +298,7 @@ export function ParameterForm({
           onChange={(v) => updatePump("mass_flow_kg_s", v as number)}
           min={0}
           step={0.001}
+          help={PARAMETER_HELP["pump.mass_flow_kg_s"]}
         />
       </Section>
 
@@ -292,6 +309,7 @@ export function ParameterForm({
             type="checkbox"
             value={config.control.enabled}
             onChange={(v) => updateControl("enabled", v)}
+            help={PARAMETER_HELP["control.enabled"]}
           />
         </div>
         <InputField
@@ -301,6 +319,7 @@ export function ParameterForm({
           onChange={(v) => updateControl("delta_t_on_k", v as number)}
           min={0}
           step={0.1}
+          help={PARAMETER_HELP["control.delta_t_on_k"]}
         />
         <InputField
           label="Delta T Off"
@@ -309,6 +328,7 @@ export function ParameterForm({
           onChange={(v) => updateControl("delta_t_off_k", v as number)}
           min={0}
           step={0.1}
+          help={PARAMETER_HELP["control.delta_t_off_k"]}
         />
         <InputField
           label="Min Irradiance"
@@ -317,6 +337,7 @@ export function ParameterForm({
           onChange={(v) => updateControl("min_irradiance_w_m2", v as number)}
           min={0}
           step={1}
+          help={PARAMETER_HELP["control.min_irradiance_w_m2"]}
         />
       </Section>
 
@@ -328,6 +349,7 @@ export function ParameterForm({
           onChange={(v) => updateSimulation("t0_s", v as number)}
           min={0}
           step={1}
+          help={PARAMETER_HELP["simulation.t0_s"]}
         />
         <InputField
           label="Time Step"
@@ -336,6 +358,7 @@ export function ParameterForm({
           onChange={(v) => updateSimulation("dt_s", v as number)}
           min={1}
           step={1}
+          help={PARAMETER_HELP["simulation.dt_s"]}
         />
         <InputField
           label="Duration"
@@ -344,6 +367,7 @@ export function ParameterForm({
           onChange={(v) => updateSimulation("duration_s", v as number)}
           min={1}
           step={1}
+          help={PARAMETER_HELP["simulation.duration_s"]}
         />
       </Section>
 
@@ -355,6 +379,7 @@ export function ParameterForm({
           onChange={(v) => updateWeather("sunrise_s", v as number)}
           min={0}
           step={3600}
+          help={PARAMETER_HELP["weather.sunrise_s"]}
         />
         <InputField
           label="Sunset"
@@ -363,6 +388,7 @@ export function ParameterForm({
           onChange={(v) => updateWeather("sunset_s", v as number)}
           min={0}
           step={3600}
+          help={PARAMETER_HELP["weather.sunset_s"]}
         />
         <InputField
           label="Peak Irradiance"
@@ -371,6 +397,7 @@ export function ParameterForm({
           onChange={(v) => updateWeather("peak_irradiance_w_m2", v as number)}
           min={0}
           step={10}
+          help={PARAMETER_HELP["weather.peak_irradiance_w_m2"]}
         />
         <InputField
           label="Ambient Mean"
@@ -379,6 +406,7 @@ export function ParameterForm({
           onChange={(v) => updateWeather("ambient_mean_k", v as number)}
           min={0}
           step={0.1}
+          help={PARAMETER_HELP["weather.ambient_mean_k"]}
         />
         <InputField
           label="Ambient Amplitude"
@@ -387,6 +415,7 @@ export function ParameterForm({
           onChange={(v) => updateWeather("ambient_amplitude_k", v as number)}
           min={0}
           step={0.1}
+          help={PARAMETER_HELP["weather.ambient_amplitude_k"]}
         />
         <InputField
           label="Ambient Period"
@@ -395,6 +424,7 @@ export function ParameterForm({
           onChange={(v) => updateWeather("ambient_period_s", v as number)}
           min={1}
           step={3600}
+          help={PARAMETER_HELP["weather.ambient_period_s"]}
         />
       </Section>
 

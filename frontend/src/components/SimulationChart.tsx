@@ -111,7 +111,7 @@ export const SimulationChart = memo(function SimulationChart({ result }: Simulat
   // Now handle conditional rendering AFTER all hooks
   if (!result) {
     return (
-      <div className="bg-white rounded-lg shadow p-6 h-full flex items-center justify-center">
+      <div className="bg-white rounded-lg shadow p-6 h-[450px] flex items-center justify-center">
         <p className="text-gray-500 text-center">
           Configure parameters and click "Run Simulation" to see results.
         </p>
@@ -122,7 +122,7 @@ export const SimulationChart = memo(function SimulationChart({ result }: Simulat
   // Defensive check: ensure result has valid data arrays
   if (chartData.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow p-6 h-full flex items-center justify-center">
+      <div className="bg-white rounded-lg shadow p-6 h-[450px] flex items-center justify-center">
         <p className="text-red-500 text-center">
           Invalid simulation result: missing or empty data arrays.
         </p>
@@ -131,7 +131,7 @@ export const SimulationChart = memo(function SimulationChart({ result }: Simulat
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-4 h-full flex flex-col">
+    <div className="bg-white rounded-lg shadow p-4 flex flex-col">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold text-gray-900">Simulation Results</h2>
         <div className="flex items-center gap-4 text-sm">
@@ -173,7 +173,7 @@ export const SimulationChart = memo(function SimulationChart({ result }: Simulat
         </div>
       </div>
 
-      <div className="flex-1 min-h-0">
+      <div className="h-[350px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 5, right: 60, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />

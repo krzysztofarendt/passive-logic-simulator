@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef, memo } from "react";
 import type { SimulationConfig } from "../types/simulation";
 
 interface ParameterFormProps {
@@ -18,7 +19,24 @@ interface InputFieldProps {
   unit?: string;
 }
 
-function InputField({
+// Custom comparison: only re-render if value, label, or type changes (not onChange)
+const inputFieldPropsAreEqual = (
+  prev: InputFieldProps,
+  next: InputFieldProps
+) => {
+  return (
+    prev.value === next.value &&
+    prev.label === next.label &&
+    prev.type === next.type &&
+    prev.unit === next.unit &&
+    prev.min === next.min &&
+    prev.max === next.max &&
+    prev.step === next.step
+  );
+};
+
+// Memoized InputField with local state for responsive typing
+const InputField = memo(function InputField({
   label,
   value,
   onChange,
@@ -28,6 +46,33 @@ function InputField({
   step = 0.01,
   unit,
 }: InputFieldProps) {
+  // Local state for immediate UI response
+  const [localValue, setLocalValue] = useState(String(value));
+
+  // Ref to always have latest onChange without triggering re-renders
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  // Sync local state when prop changes (e.g., from parent reset)
+  useEffect(() => {
+    setLocalValue(String(value));
+  }, [value]);
+
+  // Debounced update to parent
+  useEffect(() => {
+    if (type === "checkbox") return;
+
+    const parsed = parseFloat(localValue);
+    if (!isNaN(parsed) && parsed !== value) {
+      const timer = setTimeout(() => {
+        onChangeRef.current(parsed);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [localValue, type, value]);
+
   if (type === "checkbox") {
     return (
       <label className="flex items-center gap-2 text-sm">
@@ -50,8 +95,15 @@ function InputField({
       </span>
       <input
         type="number"
-        value={value as number}
-        onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+        value={localValue}
+        onChange={(e) => setLocalValue(e.target.value)}
+        onBlur={() => {
+          // Ensure value is committed on blur
+          const parsed = parseFloat(localValue);
+          if (!isNaN(parsed) && parsed !== value) {
+            onChangeRef.current(parsed);
+          }
+        }}
         min={min}
         max={max}
         step={step}
@@ -59,7 +111,7 @@ function InputField({
       />
     </label>
   );
-}
+}, inputFieldPropsAreEqual);
 
 interface SectionProps {
   title: string;

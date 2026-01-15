@@ -8,6 +8,7 @@ interface TabNavigationProps {
 const TABS: { id: TabId; label: string }[] = [
   { id: "simulation", label: "Simulation" },
   { id: "error-estimation", label: "Numerical Error Estimation" },
+  { id: "documentation", label: "Documentation" },
 ];
 
 export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {

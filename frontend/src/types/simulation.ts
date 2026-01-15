@@ -7,7 +7,7 @@
 export type SolverName = "rk4" | "euler";
 
 /** Tab identifiers */
-export type TabId = "simulation" | "error-estimation";
+export type TabId = "simulation" | "error-estimation" | "documentation";
 
 export interface CollectorParams {
   area_m2: number;

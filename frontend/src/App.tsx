@@ -4,6 +4,7 @@ import { SimulationChart } from "./components/SimulationChart";
 import { TabNavigation } from "./components/TabNavigation";
 import { SystemDiagram } from "./components/SystemDiagram";
 import { ErrorEstimationTab } from "./components/ErrorEstimationTab";
+import { DocumentationTab } from "./components/DocumentationTab";
 import { runSimulation } from "./api/simulation";
 import type { SimulationConfig, SimulationResult, TabId } from "./types/simulation";
 import { DEFAULT_CONFIG } from "./types/simulation";
@@ -102,7 +103,7 @@ function App() {
         <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
         {/* Tab Content */}
-        {activeTab === "simulation" ? (
+        {activeTab === "simulation" && (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             {/* Parameter Form - Left Side */}
             <div className="lg:col-span-2">
@@ -120,9 +121,11 @@ function App() {
               <SimulationChart result={result} />
             </div>
           </div>
-        ) : (
+        )}
+        {activeTab === "error-estimation" && (
           <ErrorEstimationTab config={config} onConfigChange={setConfig} />
         )}
+        {activeTab === "documentation" && <DocumentationTab />}
       </main>
     </div>
   );

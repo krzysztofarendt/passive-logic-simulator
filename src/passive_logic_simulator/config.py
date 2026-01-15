@@ -82,6 +82,7 @@ def _parse_weather(config: dict[str, Any], *, base_dir: Path) -> WeatherConfig:
     weather_table = _require_mapping(config.get("weather", {}), key_path="weather")
     kind = _get_str(weather_table, "kind", default="synthetic", key_path="weather")
     if kind == "synthetic":
+        ambient_period_s = _get_float(weather_table, "ambient_period_s", default=24 * 3600, key_path="weather")
         return SyntheticWeatherConfig(
             sunrise_s=_get_float(weather_table, "sunrise_s", default=6 * 3600, key_path="weather"),
             sunset_s=_get_float(weather_table, "sunset_s", default=18 * 3600, key_path="weather"),
@@ -90,8 +91,12 @@ def _parse_weather(config: dict[str, Any], *, base_dir: Path) -> WeatherConfig:
             ),
             ambient_mean_k=_get_float(weather_table, "ambient_mean_k", default=293.15, key_path="weather"),
             ambient_amplitude_k=_get_float(weather_table, "ambient_amplitude_k", default=6.0, key_path="weather"),
-            ambient_period_s=_get_float(
-                weather_table, "ambient_period_s", default=24 * 3600, key_path="weather"
+            ambient_period_s=ambient_period_s,
+            ambient_peak_s=_get_float(
+                weather_table,
+                "ambient_peak_s",
+                default=0.625 * ambient_period_s,
+                key_path="weather",
             ),
         )
     if kind == "csv":

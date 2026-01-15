@@ -16,8 +16,22 @@ def test_irradiance_clear_day_is_zero_outside_window() -> None:
     assert irradiance_clear_day_w_m2(25.0, sunrise_s=10.0, sunset_s=20.0, peak_w_m2=100.0) == 0.0
 
 
-def test_ambient_sinusoid_has_expected_mean_at_t0() -> None:
-    assert math.isclose(ambient_sinusoid_k(0.0, mean_k=300.0, amplitude_k=5.0, period_s=100.0), 305.0)
+def test_irradiance_clear_day_is_zero_at_endpoints_and_peaks_midday() -> None:
+    sunrise_s = 10.0
+    sunset_s = 20.0
+    peak = 100.0
+    assert irradiance_clear_day_w_m2(sunrise_s, sunrise_s=sunrise_s, sunset_s=sunset_s, peak_w_m2=peak) == 0.0
+    assert irradiance_clear_day_w_m2(sunset_s, sunrise_s=sunrise_s, sunset_s=sunset_s, peak_w_m2=peak) == 0.0
+
+    midday_s = (sunrise_s + sunset_s) / 2.0
+    assert irradiance_clear_day_w_m2(midday_s, sunrise_s=sunrise_s, sunset_s=sunset_s, peak_w_m2=peak) == peak
+
+
+def test_ambient_sinusoid_peaks_at_peak_s() -> None:
+    # At the configured peak time, the cosine argument is 0 and we get mean + amplitude.
+    assert math.isclose(ambient_sinusoid_k(25.0, mean_k=300.0, amplitude_k=5.0, period_s=100.0, peak_s=25.0), 305.0)
+    # Half a period later, we get the minimum: mean - amplitude.
+    assert math.isclose(ambient_sinusoid_k(75.0, mean_k=300.0, amplitude_k=5.0, period_s=100.0, peak_s=25.0), 295.0)
 
 
 def test_build_weather_synthetic() -> None:
@@ -29,6 +43,7 @@ def test_build_weather_synthetic() -> None:
             ambient_mean_k=300.0,
             ambient_amplitude_k=0.0,
             ambient_period_s=1.0,
+            ambient_peak_s=0.0,
         )
     )
     assert w.irradiance_w_m2(-1.0) == 0.0

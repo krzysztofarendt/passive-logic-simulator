@@ -80,6 +80,11 @@ class SyntheticWeatherInput(BaseModel):
     ambient_mean_k: float = Field(default=293.15, ge=0, description="Mean ambient temperature [K]")
     ambient_amplitude_k: float = Field(default=6.0, ge=0, description="Ambient temperature amplitude [K]")
     ambient_period_s: float = Field(default=86400.0, gt=0, description="Ambient temperature period [s]")
+    ambient_peak_s: float = Field(
+        default=54000.0,
+        ge=0,
+        description="Time (within the period) when ambient temperature peaks [s from midnight]",
+    )
 
 
 class SimulationRequest(BaseModel):
@@ -145,6 +150,7 @@ def simulate(request: SimulationRequest) -> SimulationResponse:
                 ambient_mean_k=request.weather.ambient_mean_k,
                 ambient_amplitude_k=request.weather.ambient_amplitude_k,
                 ambient_period_s=request.weather.ambient_period_s,
+                ambient_peak_s=request.weather.ambient_peak_s,
             ),
         )
 

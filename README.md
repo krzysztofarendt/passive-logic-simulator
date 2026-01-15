@@ -100,15 +100,16 @@ weather model intended for quick experiments (it does **not** model sun position
 
   `x = (t_s - sunrise_s) / (sunset_s - sunrise_s)`
 
-  `G(t_s) = peak_irradiance_w_m2 * (1 - cos(pi * x)) / 2`
+  `G(t_s) = peak_irradiance_w_m2 * (1 - cos(2*pi * x)) / 2`
 
-- **Outdoor ambient temperature** `T_amb(t)` [K]: a cosine wave:
+- **Outdoor ambient temperature** `T_amb(t)` [K]: a cosine wave with a configurable peak time:
 
-  `T_amb(t_s) = ambient_mean_k + ambient_amplitude_k * cos(2*pi*t_s/ambient_period_s)`
+  `T_amb(t_s) = ambient_mean_k + ambient_amplitude_k * cos(2*pi*(t_s - ambient_peak_s)/ambient_period_s)`
 
 Notes:
 - `t_s` is the simulation time in seconds (see `simulation.t0_s` / `simulation.duration_s`).
 - Set `sunrise_s` / `sunset_s` to match your timeline (e.g., seconds since midnight for a 24h run).
+- `ambient_peak_s` is the time (in the same `t_s` coordinate) when ambient temperature reaches its maximum.
 
 ### Weather from CSV
 

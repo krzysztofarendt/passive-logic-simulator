@@ -34,6 +34,7 @@ class SyntheticWeatherConfig:
     ambient_mean_k: float
     ambient_amplitude_k: float
     ambient_period_s: float
+    ambient_peak_s: float
 
 
 @dataclass(frozen=True)
@@ -51,16 +52,17 @@ WeatherConfig: TypeAlias = SyntheticWeatherConfig | CsvWeatherConfig
 
 
 def irradiance_clear_day_w_m2(t_s: float, *, sunrise_s: float, sunset_s: float, peak_w_m2: float) -> float:
-    """Simple clear-day irradiance curve (half-sine between sunrise and sunset)."""
+    """Simple clear-day irradiance curve (smooth bump between sunrise and sunset)."""
     if t_s < sunrise_s or t_s > sunset_s:
         return 0.0
     x = (t_s - sunrise_s) / (sunset_s - sunrise_s)
-    return peak_w_m2 * (1.0 - cos(pi * x)) / 2.0
+    # Raised cosine: 0 at sunrise/sunset, peak at midday, smooth endpoints.
+    return peak_w_m2 * (1.0 - cos(2.0 * pi * x)) / 2.0
 
 
-def ambient_sinusoid_k(t_s: float, *, mean_k: float, amplitude_k: float, period_s: float) -> float:
-    """Simple ambient temperature model (cosine over `period_s`)."""
-    return mean_k + amplitude_k * cos(2.0 * pi * t_s / period_s)
+def ambient_sinusoid_k(t_s: float, *, mean_k: float, amplitude_k: float, period_s: float, peak_s: float) -> float:
+    """Simple ambient temperature model (cosine over `period_s` with a configurable peak time)."""
+    return mean_k + amplitude_k * cos(2.0 * pi * (t_s - peak_s) / period_s)
 
 
 @dataclass(frozen=True)
@@ -83,6 +85,7 @@ class SyntheticWeather:
             mean_k=self.config.ambient_mean_k,
             amplitude_k=self.config.ambient_amplitude_k,
             period_s=self.config.ambient_period_s,
+            peak_s=self.config.ambient_peak_s,
         )
 
 

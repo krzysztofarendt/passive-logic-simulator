@@ -34,6 +34,7 @@ peak_irradiance_w_m2 = 850.0
 ambient_mean_k = 293.15
 ambient_amplitude_k = 6.0
 ambient_period_s = 86400.0
+ambient_peak_s = 54000.0 # 15:00 (afternoon)
 
 # For weather from file, set:
 # kind = "csv"

@@ -6,11 +6,18 @@ Run with:
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
 from passive_logic_simulator.config import SimulationConfig
 from passive_logic_simulator.params import (
@@ -23,19 +30,31 @@ from passive_logic_simulator.params import (
 from passive_logic_simulator.simulation import SimulationResult, run_simulation
 from passive_logic_simulator.weather import SyntheticWeatherConfig
 
+# Rate limiting: 30 requests per minute per IP (configurable via env)
+RATE_LIMIT = os.environ.get("RATE_LIMIT", "30/minute")
+limiter = Limiter(key_func=get_remote_address)
+
 app = FastAPI(
     title="Solar Thermal Simulation API",
     description="API for running solar collector + pump + tank simulations",
     version="0.1.0",
 )
 
-# Allow CORS for frontend development
+# Register rate limit exceeded handler
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# CORS: allow localhost dev servers + configurable production origins
+_default_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+_extra_origins = os.environ.get("CORS_ORIGINS", "").split(",")
+_allowed_origins = _default_origins + [o.strip() for o in _extra_origins if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=_allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
 )
 
 
@@ -79,7 +98,9 @@ class SimulationInput(BaseModel):
 
     t0_s: float = Field(default=0.0, description="Start time [s]")
     dt_s: float = Field(default=10.0, gt=0, description="Time step [s]")
-    duration_s: float = Field(default=86400.0, ge=0, description="Simulation duration [s]")
+    duration_s: float = Field(
+        default=86400.0, ge=0, le=864000, description="Simulation duration [s] (max 10 days)"
+    )
 
 
 class SyntheticWeatherInput(BaseModel):
@@ -184,13 +205,32 @@ def _build_simulation_response(result: SimulationResult) -> SimulationResponse:
 
 
 @app.post("/api/simulate", response_model=SimulationResponse)
-def simulate(request: SimulationRequest) -> SimulationResponse:
+@limiter.limit(RATE_LIMIT)
+def simulate(request: Request, sim_request: SimulationRequest) -> SimulationResponse:
     """Run a simulation with the provided parameters and return results."""
+    _ = request  # Required by rate limiter for IP extraction
     try:
-        config = _build_simulation_config(request)
-        result = run_simulation(config, solver=request.solver)
+        config = _build_simulation_config(sim_request)
+        result = run_simulation(config, solver=sim_request.solver)
         return _build_simulation_response(result)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Simulation failed: {exc!s}") from exc
+        raise HTTPException(status_code=500, detail="Simulation failed") from exc
+
+
+# Serve frontend static files in production (when frontend/dist exists)
+# This must be mounted AFTER API routes to avoid catching /api/* requests
+_frontend_dist = Path(__file__).parent.parent.parent / "frontend" / "dist"
+if _frontend_dist.exists():
+    # Serve static assets (JS, CSS, images)
+    app.mount("/assets", StaticFiles(directory=_frontend_dist / "assets"), name="assets")
+
+    # Serve index.html for all non-API routes (SPA fallback)
+    @app.get("/{path:path}")
+    def serve_spa(path: str) -> FileResponse:
+        """Serve the SPA index.html for client-side routing."""
+        file_path = _frontend_dist / path
+        if file_path.exists() and file_path.is_file():
+            return FileResponse(file_path)
+        return FileResponse(_frontend_dist / "index.html")

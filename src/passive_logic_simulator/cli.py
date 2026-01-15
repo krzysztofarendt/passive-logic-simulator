@@ -120,6 +120,10 @@ def _run_webapp(
         int,
         typer.Option("--frontend-port", "-f", help="Port for the Vite frontend"),
     ] = 5173,
+    prod: Annotated[
+        bool,
+        typer.Option("--prod", help="Production mode: no hot-reload, binds to 0.0.0.0"),
+    ] = False,
 ) -> None:
     """Start the backend API server and frontend development server.
 
@@ -141,9 +145,13 @@ def _run_webapp(
         typer.echo("Installing frontend dependencies...")
         subprocess.run(["npm", "install"], cwd=frontend_dir, check=True)
 
-    typer.echo(f"Starting backend on http://localhost:{backend_port}")
-    typer.echo(f"Starting frontend on http://localhost:{frontend_port}")
-    typer.echo("Press Ctrl+C to stop both servers.\n")
+    if prod:
+        typer.echo(f"Starting backend in PRODUCTION mode on http://0.0.0.0:{backend_port}")
+        typer.echo("Press Ctrl+C to stop.\n")
+    else:
+        typer.echo(f"Starting backend on http://localhost:{backend_port}")
+        typer.echo(f"Starting frontend on http://localhost:{frontend_port}")
+        typer.echo("Press Ctrl+C to stop both servers.\n")
 
     processes: list[subprocess.Popen[bytes]] = []
 
@@ -166,30 +174,39 @@ def _run_webapp(
 
     try:
         # Start backend (uvicorn)
-        backend_proc = subprocess.Popen(
-            [
-                sys.executable,
-                "-m",
-                "uvicorn",
-                "passive_logic_simulator.api:app",
-                "--host",
-                "127.0.0.1",
-                "--port",
-                str(backend_port),
-                "--reload",
-            ],
-            cwd=project_root,
-        )
+        backend_cmd = [
+            sys.executable,
+            "-m",
+            "uvicorn",
+            "passive_logic_simulator.api:app",
+            "--host",
+            "0.0.0.0" if prod else "127.0.0.1",
+            "--port",
+            str(backend_port),
+        ]
+        if not prod:
+            backend_cmd.append("--reload")
+        backend_proc = subprocess.Popen(backend_cmd, cwd=project_root)
         processes.append(backend_proc)
 
-        # Start frontend (npm run dev)
-        frontend_env = os.environ.copy()
-        frontend_proc = subprocess.Popen(
-            ["npm", "run", "dev", "--", "--port", str(frontend_port)],
-            cwd=frontend_dir,
-            env=frontend_env,
-        )
-        processes.append(frontend_proc)
+        # Start frontend
+        if prod:
+            # In production, build static assets (if not already built)
+            dist_dir = frontend_dir / "dist"
+            if not dist_dir.exists():
+                typer.echo("Building frontend for production...")
+                subprocess.run(["npm", "run", "build"], cwd=frontend_dir, check=True)
+            typer.echo(f"Serving static files from {dist_dir}")
+            typer.echo("(Frontend is built; access via backend at the same port)")
+        else:
+            # Development mode: run Vite dev server
+            frontend_env = os.environ.copy()
+            frontend_proc = subprocess.Popen(
+                ["npm", "run", "dev", "--", "--port", str(frontend_port)],
+                cwd=frontend_dir,
+                env=frontend_env,
+            )
+            processes.append(frontend_proc)
 
         # Wait for either process to exit
         while True:
@@ -216,11 +233,15 @@ def demo(
     ] = 8000,
     frontend_port: Annotated[
         int,
-        typer.Option("--frontend-port", "-f", help="Port for the Vite frontend"),
+        typer.Option("--frontend-port", "-f", help="Port for the Vite frontend (dev only)"),
     ] = 5173,
+    prod: Annotated[
+        bool,
+        typer.Option("--prod", help="Production mode: no hot-reload, binds to 0.0.0.0, serves built frontend"),
+    ] = False,
 ) -> None:
     """Start the demo webapp (backend + frontend)."""
-    _run_webapp(backend_port=backend_port, frontend_port=frontend_port)
+    _run_webapp(backend_port=backend_port, frontend_port=frontend_port, prod=prod)
 
 
 def main(argv: list[str] | None = None) -> None:

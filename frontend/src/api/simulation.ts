@@ -10,7 +10,10 @@ import type {
   ErrorStatistics,
 } from "../types/simulation";
 
-const API_BASE_URL = "http://localhost:8000";
+// Use environment variable for production, fallback to localhost for development.
+// In production, set VITE_API_URL to your backend URL (e.g., "https://api.example.com")
+// or leave empty to use relative URLs (same origin).
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "";
 
 export async function runSimulation(
   config: SimulationConfig,
@@ -28,9 +31,10 @@ export async function runSimulation(
     });
   } catch {
     // Network errors (e.g., backend not running)
+    const serverInfo = API_BASE_URL || "the server";
     throw new Error(
-      `Cannot connect to simulation server at ${API_BASE_URL}. ` +
-      `Make sure the backend is running with: uv run passive-logic-simulator demo`
+      `Cannot connect to simulation server (${serverInfo}). ` +
+      `Make sure the backend is running.`
     );
   }
 

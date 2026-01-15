@@ -16,7 +16,7 @@ import { MAX_SIMULATION_DURATION_DAYS, MAX_SIMULATION_DURATION_HOURS } from "../
 // or leave empty to use relative URLs (same origin).
 const API_BASE_URL =
   import.meta.env.VITE_API_URL ??
-  (import.meta.env.DEV ? "http://localhost:8000" : "");
+  (import.meta.env.DEV ? "http://localhost:8011" : "");
 
 type FastApiValidationIssue = {
   loc?: unknown;

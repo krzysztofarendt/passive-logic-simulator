@@ -115,7 +115,7 @@ def _run_webapp(
     backend_port: Annotated[
         int,
         typer.Option("--backend-port", "-b", help="Port for the FastAPI backend"),
-    ] = 8000,
+    ] = 8011,
     frontend_port: Annotated[
         int,
         typer.Option("--frontend-port", "-f", help="Port for the Vite frontend"),
@@ -233,7 +233,7 @@ def demo(
     backend_port: Annotated[
         int,
         typer.Option("--backend-port", "-b", help="Port for the FastAPI backend"),
-    ] = 8000,
+    ] = 8011,
     frontend_port: Annotated[
         int,
         typer.Option("--frontend-port", "-f", help="Port for the Vite frontend (dev only)"),

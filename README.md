@@ -214,7 +214,7 @@ uv run passive-logic-simulator demo
 
 Demo notes:
 - The first run may install frontend dependencies under `frontend/node_modules/`.
-- Backend serves on `http://localhost:8000`, frontend dev server on `http://localhost:5173` (both configurable via CLI flags).
+- Backend serves on `http://localhost:8011`, frontend dev server on `http://localhost:5173` (both configurable via CLI flags).
 
 ### Build the frontend (static)
 
@@ -233,7 +233,7 @@ npm run preview -- --port 5173
 Run the backend in a separate terminal:
 
 ```bash
-uv run uvicorn passive_logic_simulator.api:app --host 127.0.0.1 --port 8000
+uv run uvicorn passive_logic_simulator.api:app --host 127.0.0.1 --port 8011
 ```
 
 ## Python API

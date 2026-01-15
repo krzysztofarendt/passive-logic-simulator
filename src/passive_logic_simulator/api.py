@@ -1,7 +1,7 @@
 """FastAPI server for running simulations via HTTP.
 
 Run with:
-    uv run uvicorn passive_logic_simulator.api:app --reload --port 8000
+    uv run uvicorn passive_logic_simulator.api:app --reload --port 8011
 """
 
 from __future__ import annotations

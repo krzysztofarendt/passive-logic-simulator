@@ -26,7 +26,7 @@ Keep new simulation code inside the package and avoid growing `main.py`.
 The project includes a FastAPI backend (`api.py`) and a React frontend for interactive simulations.
 
 - **API**: FastAPI server at `POST /api/simulate` accepts JSON with collector, tank, pump, control, simulation, and weather parameters. Returns time series of tank temperature, ambient temperature, irradiance, and pump state.
-- **Frontend**: React 19 + TypeScript + Vite + Tailwind CSS. Uses Recharts for visualization. Communicates with the backend API on port 8000.
+- **Frontend**: React 19 + TypeScript + Vite + Tailwind CSS. Uses Recharts for visualization. Communicates with the backend API on port 8011.
 - **CORS**: The API allows requests from `localhost:5173` (Vite dev server).
 
 ## Build, Test, and Development Commands
@@ -39,7 +39,7 @@ This repo targets Python 3.12 (see `.python-version`) and uses `uv` for dependen
 - `uv run python main.py`: run the application using the managed environment.
 - `uv run passive-logic-simulator run --config resources/default_config.toml --output-csv out/simulation.csv`: run via the package CLI and write results to CSV.
 - `uv run passive-logic-simulator demo`: start the demo webapp (backend + frontend).
-- `uv run uvicorn passive_logic_simulator.api:app --reload --port 8000`: run the API server standalone.
+- `uv run uvicorn passive_logic_simulator.api:app --reload --port 8011`: run the API server standalone.
 - `uv add <package>`: add a dependency and update the lockfile.
 - `uv run pytest`: run the test suite.
 

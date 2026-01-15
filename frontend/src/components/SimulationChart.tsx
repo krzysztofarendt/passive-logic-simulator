@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, memo } from "react";
 import {
   LineChart,
   Line,
@@ -18,17 +18,9 @@ interface SimulationChartProps {
   result: SimulationResult | null;
 }
 
-interface ChartDataPoint {
-  time_h: number;
-  tank_temp: number;
-  ambient_temp: number;
-  irradiance: number;
-  pump_on: boolean;
-}
-
 type TemperatureUnit = "celsius" | "kelvin";
 
-export function SimulationChart({ result }: SimulationChartProps) {
+export const SimulationChart = memo(function SimulationChart({ result }: SimulationChartProps) {
   const [tempUnit, setTempUnit] = useState<TemperatureUnit>("celsius");
   const [showIrradiance, setShowIrradiance] = useState(true);
   const [showAmbient, setShowAmbient] = useState(true);
@@ -44,47 +36,61 @@ export function SimulationChart({ result }: SimulationChartProps) {
     );
   }
 
+  const tempLabel = tempUnit === "celsius" ? "C" : "K";
   const convertTemp = (k: number) =>
     tempUnit === "celsius" ? kelvinToCelsius(k) : k;
-  const tempLabel = tempUnit === "celsius" ? "C" : "K";
 
-  // Transform data for Recharts
-  const chartData: ChartDataPoint[] = result.times_s.map((t, i) => ({
-    time_h: secondsToHours(t),
-    tank_temp: convertTemp(result.tank_temperature_k[i]),
-    ambient_temp: convertTemp(result.ambient_temperature_k[i]),
-    irradiance: result.irradiance_w_m2[i],
-    pump_on: result.pump_on[i],
-  }));
+  // Transform data for Recharts - memoized to avoid recomputing on every render
+  const chartData = useMemo(() => {
+    const toTemp = (k: number) =>
+      tempUnit === "celsius" ? kelvinToCelsius(k) : k;
+    return result.times_s.map((t, i) => ({
+      time_h: secondsToHours(t),
+      tank_temp: toTemp(result.tank_temperature_k[i]),
+      ambient_temp: toTemp(result.ambient_temperature_k[i]),
+      irradiance: result.irradiance_w_m2[i],
+      pump_on: result.pump_on[i],
+    }));
+  }, [result, tempUnit]);
 
-  // Find pump-on regions for shading
-  const pumpRegions: { start: number; end: number }[] = [];
-  let regionStart: number | null = null;
-  for (let i = 0; i < chartData.length; i++) {
-    if (chartData[i].pump_on && regionStart === null) {
-      regionStart = chartData[i].time_h;
-    } else if (!chartData[i].pump_on && regionStart !== null) {
-      pumpRegions.push({ start: regionStart, end: chartData[i].time_h });
-      regionStart = null;
+  // Find pump-on regions for shading - memoized
+  const pumpRegions = useMemo(() => {
+    const regions: { start: number; end: number }[] = [];
+    let regionStart: number | null = null;
+    for (let i = 0; i < chartData.length; i++) {
+      if (chartData[i].pump_on && regionStart === null) {
+        regionStart = chartData[i].time_h;
+      } else if (!chartData[i].pump_on && regionStart !== null) {
+        regions.push({ start: regionStart, end: chartData[i].time_h });
+        regionStart = null;
+      }
     }
-  }
-  if (regionStart !== null) {
-    pumpRegions.push({
-      start: regionStart,
-      end: chartData[chartData.length - 1].time_h,
-    });
-  }
+    if (regionStart !== null) {
+      regions.push({
+        start: regionStart,
+        end: chartData[chartData.length - 1].time_h,
+      });
+    }
+    return regions;
+  }, [chartData]);
 
-  // Calculate min/max for temperature axis
-  const allTemps = [
-    ...chartData.map((d) => d.tank_temp),
-    ...(showAmbient ? chartData.map((d) => d.ambient_temp) : []),
-  ];
-  const tempMin = Math.floor(Math.min(...allTemps) - 2);
-  const tempMax = Math.ceil(Math.max(...allTemps) + 2);
+  // Calculate min/max for temperature axis - memoized
+  const { tempMin, tempMax } = useMemo(() => {
+    const allTemps = [
+      ...chartData.map((d) => d.tank_temp),
+      ...(showAmbient ? chartData.map((d) => d.ambient_temp) : []),
+    ];
+    return {
+      tempMin: Math.floor(Math.min(...allTemps) - 2),
+      tempMax: Math.ceil(Math.max(...allTemps) + 2),
+    };
+  }, [chartData, showAmbient]);
 
-  // Max irradiance for secondary axis
-  const maxIrradiance = Math.max(...result.irradiance_w_m2);
+  // Max irradiance for secondary axis - memoized
+  const maxIrradiance = useMemo(
+    () => Math.max(...result.irradiance_w_m2),
+    [result]
+  );
 
   return (
     <div className="bg-white rounded-lg shadow p-4 h-full flex flex-col">
@@ -275,4 +281,4 @@ export function SimulationChart({ result }: SimulationChartProps) {
       </div>
     </div>
   );
-}
+});

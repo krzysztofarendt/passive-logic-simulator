@@ -193,6 +193,7 @@ export const SimulationChart = memo(function SimulationChart({ result }: Simulat
                 style: { textAnchor: "middle" },
               }}
               tick={{ fontSize: 12 }}
+              tickFormatter={(v) => Math.round(v).toString()}
             />
             {showIrradiance && (
               <YAxis
@@ -206,6 +207,7 @@ export const SimulationChart = memo(function SimulationChart({ result }: Simulat
                   style: { textAnchor: "middle" },
                 }}
                 tick={{ fontSize: 12 }}
+                tickFormatter={(v) => Math.round(v).toString()}
               />
             )}
             <Tooltip
@@ -218,7 +220,7 @@ export const SimulationChart = memo(function SimulationChart({ result }: Simulat
               }}
               labelFormatter={(label) => `Time: ${Number(label).toFixed(2)} h`}
             />
-            <Legend />
+            <Legend wrapperStyle={{ paddingTop: 20 }} />
 
             {/* Pump-on regions */}
             {showPumpRegions &&

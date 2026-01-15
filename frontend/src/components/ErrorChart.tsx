@@ -57,7 +57,7 @@ export function ErrorChart({ result }: ErrorChartProps) {
           </svg>
           <p className="text-lg font-medium">No comparison data</p>
           <p className="text-sm mt-1">
-            Run comparison to see Euler vs RK4 errors
+            Run comparison to see Euler vs RK4 differences
           </p>
         </div>
       </div>
@@ -67,17 +67,17 @@ export function ErrorChart({ result }: ErrorChartProps) {
   return (
     <div className="bg-white rounded-lg shadow p-4 flex flex-col">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">
-        Numerical Error Analysis (Euler vs RK4)
+        Numerical Discrepancy (Euler vs RK4)
       </h3>
 
       {/* Temperature Error Chart */}
       <div className="mb-4">
         <h4 className="text-sm font-medium text-gray-700 mb-2">
-          Temperature Error (T_euler - T_rk4)
+          Temperature Difference (T_euler - T_rk4)
         </h4>
         <div className="flex items-center">
           <div className="flex-shrink-0 w-16 text-xs text-gray-600 text-center">
-            Error (K)
+            Difference (K)
           </div>
           <div className="flex-1 min-w-0">
             <ResponsiveContainer width="100%" height={150}>
@@ -96,7 +96,7 @@ export function ErrorChart({ result }: ErrorChartProps) {
                   tickFormatter={(v) => v.toFixed(3)}
                 />
                 <Tooltip
-                  formatter={(value) => [typeof value === "number" ? value.toFixed(4) + " K" : "-", "Temp Error"]}
+                  formatter={(value) => [typeof value === "number" ? value.toFixed(4) + " K" : "-", "Temp Difference"]}
                   labelFormatter={(label) => `Time: ${Number(label).toFixed(2)} h`}
                 />
                 <Line
@@ -105,7 +105,7 @@ export function ErrorChart({ result }: ErrorChartProps) {
                   stroke="#ef4444"
                   strokeWidth={1.5}
                   dot={false}
-                  name="Temperature Error"
+                  name="Temperature Difference"
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -116,11 +116,11 @@ export function ErrorChart({ result }: ErrorChartProps) {
       {/* Energy Error Chart */}
       <div className="mb-4">
         <h4 className="text-sm font-medium text-gray-700 mb-2">
-          Cumulative Energy Error
+          Cumulative Energy Difference (E_euler - E_rk4)
         </h4>
         <div className="flex items-center">
           <div className="flex-shrink-0 w-16 text-xs text-gray-600 text-center">
-            Error (kJ)
+            Difference (kJ)
           </div>
           <div className="flex-1 min-w-0">
             <ResponsiveContainer width="100%" height={150}>
@@ -139,7 +139,7 @@ export function ErrorChart({ result }: ErrorChartProps) {
                   tickFormatter={(v) => v.toFixed(0)}
                 />
                 <Tooltip
-                  formatter={(value) => [typeof value === "number" ? value.toFixed(2) + " kJ" : "-", "Energy Error"]}
+                  formatter={(value) => [typeof value === "number" ? value.toFixed(2) + " kJ" : "-", "Energy Difference"]}
                   labelFormatter={(label) => `Time: ${Number(label).toFixed(2)} h`}
                 />
                 <Line
@@ -148,7 +148,7 @@ export function ErrorChart({ result }: ErrorChartProps) {
                   stroke="#f59e0b"
                   strokeWidth={1.5}
                   dot={false}
-                  name="Energy Error"
+                  name="Energy Difference"
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -161,22 +161,22 @@ export function ErrorChart({ result }: ErrorChartProps) {
         <h4 className="text-sm font-medium text-gray-700 mb-3">Summary Statistics</h4>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard
-            label="Max Abs Error"
+            label="Max Abs Difference"
             value={result.stats.max_abs_temp_error_k.toFixed(4)}
             unit="K"
           />
           <StatCard
-            label="RMS Error"
+            label="RMS Difference"
             value={result.stats.rms_temp_error_k.toFixed(4)}
             unit="K"
           />
           <StatCard
-            label="Mean Error"
+            label="Mean Difference"
             value={result.stats.mean_temp_error_k.toFixed(4)}
             unit="K"
           />
           <StatCard
-            label="Final Energy Error"
+            label="Final Energy Difference"
             value={result.stats.final_energy_error_kj.toFixed(2)}
             unit="kJ"
           />

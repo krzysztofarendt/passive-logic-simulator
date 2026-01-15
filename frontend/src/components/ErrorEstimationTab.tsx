@@ -52,7 +52,7 @@ export function ErrorEstimationTab({ config, onConfigChange }: ErrorEstimationTa
       <div className="lg:col-span-2">
         <div className="bg-white rounded-lg shadow p-4">
           <h2 className="text-lg font-bold text-gray-900 mb-4">
-            Error Estimation Parameters
+            Discrepancy Parameters
           </h2>
 
           <p className="text-sm text-gray-600 mb-6">
@@ -75,7 +75,7 @@ export function ErrorEstimationTab({ config, onConfigChange }: ErrorEstimationTa
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
               />
               <p className="mt-1 text-xs text-gray-500">
-                Larger time steps = more numerical error (faster)
+                Larger time steps = larger method discrepancy (faster)
               </p>
             </label>
 
@@ -93,7 +93,7 @@ export function ErrorEstimationTab({ config, onConfigChange }: ErrorEstimationTa
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
               />
               <p className="mt-1 text-xs text-gray-500">
-                Longer simulations = more error accumulation
+                Longer simulations = more discrepancy accumulation
               </p>
             </label>
           </div>

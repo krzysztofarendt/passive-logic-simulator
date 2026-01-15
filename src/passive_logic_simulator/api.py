@@ -145,8 +145,8 @@ class SimulationResponse(BaseModel):
     pump_on: list[bool]
 
 
-@app.get("/")
-def root() -> dict[str, str]:
+@app.get("/health")
+def health() -> dict[str, str]:
     """Health check endpoint."""
     return {"status": "ok", "message": "Solar Thermal Simulation API"}
 
@@ -225,6 +225,11 @@ _frontend_dist = Path(__file__).parent.parent.parent / "frontend" / "dist"
 if _frontend_dist.exists():
     # Serve static assets (JS, CSS, images)
     app.mount("/assets", StaticFiles(directory=_frontend_dist / "assets"), name="assets")
+
+    @app.get("/")
+    def serve_root() -> FileResponse:
+        """Serve the frontend index.html at root."""
+        return FileResponse(_frontend_dist / "index.html")
 
     # Serve index.html for all non-API routes (SPA fallback)
     @app.get("/{path:path}")

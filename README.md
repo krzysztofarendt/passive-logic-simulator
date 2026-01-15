@@ -1,4 +1,4 @@
-# passive-logic
+# Solar Collector Simulator
 
 ## Problem
 
@@ -177,15 +177,64 @@ To use Euler (for numerical error comparisons):
 uv run passive-logic-simulator run --solver euler --config resources/default_config.toml --output-csv out/simulation.csv
 ```
 
-To start the demo webapp (backend + frontend):
+## Web App (Demo UI)
+
+The demo web app consists of a FastAPI backend (`src/passive_logic_simulator/api.py`) and a Vite/React frontend (`frontend/`).
+
+### Prerequisites (Fedora Linux)
+
+Programs you need installed:
+
+- Python 3.12
+- `uv` (Python dependency management / runner)
+- Node.js + `npm` (frontend dev server + build)
+
+Install system packages:
 
 ```bash
+sudo dnf install -y curl python3.12 python3.12-devel nodejs npm
+```
+
+Install `uv` (recommended):
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+If `uv` isn’t found after installation, open a new shell or add `~/.local/bin` to your `PATH`.
+
+### Start the web app (dev mode)
+
+From the repo root:
+
+```bash
+uv sync
 uv run passive-logic-simulator demo
 ```
 
 Demo notes:
-- Requires Node.js + `npm` (the first run will install frontend dependencies under `frontend/node_modules/`).
+- The first run may install frontend dependencies under `frontend/node_modules/`.
 - Backend serves on `http://localhost:8000`, frontend dev server on `http://localhost:5173` (both configurable via CLI flags).
+
+### Build the frontend (static)
+
+```bash
+cd frontend
+npm ci
+npm run build
+```
+
+To preview the built frontend locally:
+
+```bash
+npm run preview -- --port 5173
+```
+
+Run the backend in a separate terminal:
+
+```bash
+uv run uvicorn passive_logic_simulator.api:app --host 127.0.0.1 --port 8000
+```
 
 ## Python API
 

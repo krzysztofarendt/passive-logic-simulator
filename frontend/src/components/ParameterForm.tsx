@@ -194,7 +194,7 @@ export function ParameterForm({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-4 h-full overflow-y-auto">
+    <div className="bg-white rounded-lg shadow p-4">
       <h2 className="text-lg font-bold text-gray-900 mb-4">
         Simulation Parameters
       </h2>

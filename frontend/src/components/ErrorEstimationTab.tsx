@@ -47,10 +47,10 @@ export function ErrorEstimationTab({ config, onConfigChange }: ErrorEstimationTa
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-12rem)]">
+    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
       {/* Parameters Panel - Left Side */}
-      <div className="lg:col-span-1 h-full">
-        <div className="bg-white rounded-lg shadow p-4 h-full overflow-y-auto">
+      <div className="lg:col-span-2">
+        <div className="bg-white rounded-lg shadow p-4">
           <h2 className="text-lg font-bold text-gray-900 mb-4">
             Error Estimation Parameters
           </h2>
@@ -129,11 +129,9 @@ export function ErrorEstimationTab({ config, onConfigChange }: ErrorEstimationTa
       </div>
 
       {/* Results Panel - Right Side */}
-      <div className="lg:col-span-2 h-full min-h-[500px] flex flex-col gap-4">
+      <div className="lg:col-span-3 flex flex-col gap-4">
         <SystemDiagram />
-        <div className="flex-1">
-          <ErrorChart result={result} />
-        </div>
+        <ErrorChart result={result} />
       </div>
     </div>
   );

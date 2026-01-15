@@ -32,7 +32,7 @@ function App() {
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
       <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="max-w-[1600px] mx-auto px-6 py-4">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center">
               <svg
@@ -63,7 +63,7 @@ function App() {
 
       {/* Error Banner */}
       {error && (
-        <div className="max-w-7xl mx-auto px-4 mt-4">
+        <div className="max-w-[1600px] mx-auto px-6 mt-4">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
             <svg
               className="w-5 h-5 text-red-500 flex-shrink-0"
@@ -97,15 +97,15 @@ function App() {
       )}
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-6">
+      <main className="max-w-[1600px] mx-auto px-6 py-6">
         {/* Tab Navigation */}
         <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
         {/* Tab Content */}
         {activeTab === "simulation" ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-14rem)]">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             {/* Parameter Form - Left Side */}
-            <div className="lg:col-span-1 h-full">
+            <div className="lg:col-span-2">
               <ParameterForm
                 config={config}
                 onChange={setConfig}
@@ -115,11 +115,9 @@ function App() {
             </div>
 
             {/* Chart Area - Right Side */}
-            <div className="lg:col-span-2 h-full min-h-[500px] flex flex-col gap-4">
+            <div className="lg:col-span-3 flex flex-col gap-4">
               <SystemDiagram />
-              <div className="flex-1">
-                <SimulationChart result={result} />
-              </div>
+              <SimulationChart result={result} />
             </div>
           </div>
         ) : (

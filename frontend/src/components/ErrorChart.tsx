@@ -40,7 +40,7 @@ export function ErrorChart({ result }: ErrorChartProps) {
 
   if (!result) {
     return (
-      <div className="bg-white rounded-lg shadow p-6 h-full flex items-center justify-center">
+      <div className="bg-white rounded-lg shadow p-6 h-[450px] flex items-center justify-center">
         <div className="text-center text-gray-500">
           <svg
             className="w-16 h-16 mx-auto mb-4 text-gray-300"
@@ -65,17 +65,17 @@ export function ErrorChart({ result }: ErrorChartProps) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-4 h-full flex flex-col">
+    <div className="bg-white rounded-lg shadow p-4 flex flex-col">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">
         Numerical Error Analysis (Euler vs RK4)
       </h3>
 
       {/* Temperature Error Chart */}
-      <div className="flex-1 min-h-[200px] mb-4">
+      <div className="mb-4">
         <h4 className="text-sm font-medium text-gray-700 mb-2">
           Temperature Error (T_euler - T_rk4)
         </h4>
-        <ResponsiveContainer width="100%" height={180}>
+        <ResponsiveContainer width="100%" height={150}>
           <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis
@@ -108,11 +108,11 @@ export function ErrorChart({ result }: ErrorChartProps) {
       </div>
 
       {/* Energy Error Chart */}
-      <div className="flex-1 min-h-[200px] mb-4">
+      <div className="mb-4">
         <h4 className="text-sm font-medium text-gray-700 mb-2">
           Cumulative Energy Error
         </h4>
-        <ResponsiveContainer width="100%" height={180}>
+        <ResponsiveContainer width="100%" height={150}>
           <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis

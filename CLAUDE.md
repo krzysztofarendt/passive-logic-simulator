@@ -14,7 +14,7 @@ Keep new simulation code inside the package and avoid growing `main.py`.
 - Model: solar collector → pumped loop → well-mixed storage tank (single state `T_tank`).
 - Units: **all temperatures are Kelvin**; keep parameters consistent with the units listed in `README.md`.
 - Control: pump uses hysteresis (`ΔT_on`, `ΔT_off`) and should not cool the tank (collector useful heat is clamped to `Q_u >= 0`).
-- Numerics: fixed-step **RK4**; pump state updates once per time step and is held constant within the RK4 sub-steps.
+- Numerics: fixed-step **RK4** (default) or **Euler**; pump state updates once per time step and is held constant within the step (and RK4 sub-steps).
 - Numerics: `duration_s` should be an integer multiple of `dt_s`.
 - Weather inputs: `G(t)` and outdoor `T_amb(t)` can come from a synthetic model or a CSV time series.
 - Tank losses: use constant indoor/room temperature `T_room` (configurable) as the tank loss reference.
@@ -25,7 +25,8 @@ This repo targets Python 3.12 (see `.python-version`) and uses `uv` for dependen
 
 - `uv sync`: create/update the virtual environment from `pyproject.toml`/`uv.lock`.
 - `uv run python main.py`: run the application using the managed environment.
-- `uv run passive-logic-simulator --config resources/default_config.toml --output-csv out/simulation.csv`: run via the package CLI and write results to CSV.
+- `uv run passive-logic-simulator run --config resources/default_config.toml --output-csv out/simulation.csv`: run via the package CLI and write results to CSV.
+- `uv run passive-logic-simulator demo`: start the demo webapp (backend + frontend).
 - `uv add <package>`: add a dependency and update the lockfile.
 
 When tests exist:

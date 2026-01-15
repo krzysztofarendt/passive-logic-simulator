@@ -117,7 +117,19 @@ The system is integrated forward in time using a fixed-step method on the tank t
 Edit parameters in `resources/default_config.toml` and run:
 
 ```bash
-uv run passive-logic-simulator --config resources/default_config.toml --output-csv out/simulation.csv
+uv run passive-logic-simulator run --config resources/default_config.toml --output-csv out/simulation.csv
+```
+
+To use Euler (for numerical error comparisons):
+
+```bash
+uv run passive-logic-simulator run --solver euler --config resources/default_config.toml --output-csv out/simulation.csv
+```
+
+To start the demo webapp (backend + frontend):
+
+```bash
+uv run passive-logic-simulator demo
 ```
 
 The output CSV contains:
@@ -169,5 +181,6 @@ uv run python main.py
 uv run pytest
 
 # or run the installed CLI entrypoint:
-uv run passive-logic-simulator --config resources/default_config.toml --output-csv out/simulation.csv
+uv run passive-logic-simulator run --config resources/default_config.toml --output-csv out/simulation.csv
+uv run passive-logic-simulator demo
 ```

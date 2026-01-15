@@ -1,4 +1,5 @@
 import textwrap
+from typing import Literal
 
 import pytest
 
@@ -27,7 +28,10 @@ def test_load_config_rejects_invalid_weather_extrapolation(tmp_path) -> None:
         load_config(toml_path)
 
 
-def test_run_simulation_constant_inputs_matches_linear_solution(tmp_path) -> None:
+@pytest.mark.parametrize("solver", ["rk4", "euler"])
+def test_run_simulation_constant_inputs_matches_linear_solution(
+    tmp_path, solver: Literal["rk4", "euler"]
+) -> None:
     # Create constant weather so collector heat is constant.
     weather_csv = tmp_path / "weather.csv"
     weather_csv.write_text(
@@ -78,7 +82,7 @@ def test_run_simulation_constant_inputs_matches_linear_solution(tmp_path) -> Non
     )
 
     config = load_config(config_toml)
-    result = run_simulation(config)
+    result = run_simulation(config, solver=solver)
 
     assert len(result.times_s) == 11
     assert result.times_s[0] == 0.0

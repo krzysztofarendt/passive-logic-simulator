@@ -94,6 +94,10 @@ class SimulationRequest(BaseModel):
     control: ControlInput = Field(default_factory=ControlInput)
     simulation: SimulationInput = Field(default_factory=SimulationInput)
     weather: SyntheticWeatherInput = Field(default_factory=SyntheticWeatherInput)
+    solver: Literal["rk4", "euler"] = Field(
+        default="rk4",
+        description="Numerical integrator for T_tank(t)",
+    )
 
 
 class SimulationResponse(BaseModel):
@@ -154,7 +158,7 @@ def simulate(request: SimulationRequest) -> SimulationResponse:
             ),
         )
 
-        result = run_simulation(config)
+        result = run_simulation(config, solver=request.solver)
 
         return SimulationResponse(
             times_s=result.times_s,

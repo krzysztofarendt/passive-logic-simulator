@@ -8,7 +8,7 @@ import signal
 import subprocess
 import sys
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated, Literal, Optional
 
 import typer
 
@@ -80,6 +80,10 @@ def run(
         Path,
         typer.Option("--config", "-c", help="Path to TOML config file"),
     ] = Path("resources/default_config.toml"),
+    solver: Annotated[
+        Literal["rk4", "euler"],
+        typer.Option("--solver", help="Numerical solver for the tank ODE: rk4 or euler"),
+    ] = "rk4",
     output_csv: Annotated[
         Path,
         typer.Option("--output-csv", "-o", help="Write results to CSV file"),
@@ -87,7 +91,7 @@ def run(
 ) -> None:
     """Run a simulation with the given config and write results to CSV."""
     sim_config = load_config(config)
-    result = run_simulation(sim_config)
+    result = run_simulation(sim_config, solver=solver)
 
     _write_results_csv(
         output_csv,

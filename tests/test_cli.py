@@ -64,3 +64,43 @@ def test_cli_main_writes_csv(tmp_path: Path) -> None:
     assert result.exit_code == 0
     assert "Wrote" in result.stdout
     assert output_csv.exists()
+
+
+def test_cli_main_accepts_euler_solver(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    output_csv = tmp_path / "simulation.csv"
+    config_path.write_text(
+        textwrap.dedent(
+            """
+            [simulation]
+            dt_s = 1.0
+            duration_s = 2.0
+
+            [weather]
+            kind = "synthetic"
+            sunrise_s = 0.0
+            sunset_s = 100.0
+            peak_irradiance_w_m2 = 0.0
+            ambient_mean_k = 293.15
+            ambient_amplitude_k = 0.0
+            ambient_period_s = 86400.0
+            """
+        ).strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    result = runner.invoke(
+        app,
+        [
+            "run",
+            "--solver",
+            "euler",
+            "--config",
+            str(config_path),
+            "--output-csv",
+            str(output_csv),
+        ],
+    )
+    assert result.exit_code == 0
+    assert output_csv.exists()

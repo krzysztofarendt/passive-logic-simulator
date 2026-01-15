@@ -3,17 +3,18 @@
 This module wires together:
 - weather inputs (`G(t)`, `T_amb(t)`)
 - pump hysteresis control (updated once per step)
-- RK4 fixed-step integration of the single tank state `T_tank`
+- fixed-step integration (Euler or RK4) of the single tank state `T_tank`
 """
 
 from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from typing import Literal
 
 from passive_logic_simulator.config import SimulationConfig
 from passive_logic_simulator.control import update_pump_state
-from passive_logic_simulator.numerics import rk4_step
+from passive_logic_simulator.numerics import euler_step, rk4_step
 from passive_logic_simulator.physics import collector_outlet_k, collector_useful_heat_w, tank_dTdt_k_s
 from passive_logic_simulator.weather import build_weather
 
@@ -29,7 +30,10 @@ class SimulationResult:
     pump_on: list[bool]
 
 
-def run_simulation(config: SimulationConfig) -> SimulationResult:
+SolverName = Literal["rk4", "euler"]
+
+
+def run_simulation(config: SimulationConfig, *, solver: SolverName = "rk4") -> SimulationResult:
     """Run a transient simulation and return the full trajectory."""
     weather = build_weather(config.weather)
 
@@ -49,6 +53,9 @@ def run_simulation(config: SimulationConfig) -> SimulationResult:
     n_steps = int(round(n_steps_float))
     if not math.isclose(n_steps_float, n_steps, rel_tol=0.0, abs_tol=1e-12):
         raise ValueError("simulation.duration_s must be an integer multiple of simulation.dt_s")
+
+    if solver not in {"rk4", "euler"}:
+        raise ValueError("solver must be one of: 'rk4', 'euler'")
 
     for step in range(n_steps + 1):
         g = weather.irradiance_w_m2(t_s)
@@ -108,7 +115,10 @@ def run_simulation(config: SimulationConfig) -> SimulationResult:
                 tank=config.tank,
             )
 
-        t_tank_k = rk4_step(t_s, t_tank_k, config.sim.dt_s, rhs)
+        if solver == "rk4":
+            t_tank_k = rk4_step(t_s, t_tank_k, config.sim.dt_s, rhs)
+        else:
+            t_tank_k = euler_step(t_s, t_tank_k, config.sim.dt_s, rhs)
         t_s += config.sim.dt_s
 
     return SimulationResult(

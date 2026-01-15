@@ -4,6 +4,49 @@
 
 Simulate heat transfer from a solar thermal collector (“solar panel”) through a pumped fluid loop into a storage tank, producing the tank temperature trajectory `T_tank(t)` given weather inputs and system parameters.
 
+## Quickstart
+
+This repo targets Python 3.12 and uses `uv` for dependency management.
+
+```bash
+uv sync
+uv run passive-logic-simulator run --config resources/default_config.toml --output-csv out/simulation.csv
+```
+
+The output CSV contains:
+
+- `time_s` [s]
+- `tank_temperature_k` [K]
+- `ambient_temperature_k` [K]
+- `irradiance_w_m2` [W/m²]
+- `pump_on` (0/1)
+
+## Repository Layout
+
+```text
+.
+├── main.py                          # Thin runner that delegates to the package CLI
+├── pyproject.toml                   # Project metadata + CLI entrypoints
+├── resources/
+│   ├── default_config.toml          # Default simulation configuration (TOML)
+│   └── templates/weather.csv        # Example weather time series for CSV mode
+├── src/passive_logic_simulator/
+│   ├── __init__.py                  # Public Python API exports
+│   ├── __main__.py                  # `python -m passive_logic_simulator`
+│   ├── api.py                       # FastAPI backend used by the demo
+│   ├── cli.py                       # Typer CLI (`run`, `demo`) + CSV export
+│   ├── config.py                    # TOML -> typed `SimulationConfig`
+│   ├── control.py                   # Pump hysteresis (deadband) controller
+│   ├── numerics.py                  # Fixed-step RK4 + Euler integrators
+│   ├── params.py                    # Typed parameter dataclasses + validation
+│   ├── physics.py                   # Collector + tank energy-balance functions
+│   ├── simulation.py                # Orchestrates weather + control + integration
+│   ├── time_series.py               # Linear interpolation for CSV weather
+│   └── weather.py                   # Synthetic weather and CSV-backed weather
+├── tests/                           # Pytest unit tests for the model + utilities
+└── frontend/                        # Demo UI (Vite dev server, talks to `api.py`)
+```
+
 ## System Overview
 
 Closed-loop hydronic circuit:
@@ -44,6 +87,7 @@ Tank energy balance (well-mixed tank, loop return from tank):
 
 Notes:
 - Clamp `Q_u >= 0` (or turn pump off) if the collector would remove heat from the tank.
+- `T_in` is assumed to be the current tank temperature (`T_in = T_tank`) since the loop returns from the tank.
 - Use Kelvin for all temperatures (if inputs are in Celsius, add `273.15`).
 - Pump control uses a deadband/hysteresis controller (see “Pump Control (Hysteresis)” below).
 
@@ -88,8 +132,8 @@ Within a time step, the computed pump state is held constant for the RK4 sub-ste
 The system is integrated forward in time using a fixed-step method on the tank temperature ODE:
 
 - State: `T_tank(t)` [K]
-- Solver: RK4 (default) or forward Euler, both with step `dt`
-- Switching: pump state updates once per step (hysteresis) and is held constant during the RK4 sub-stages; choose `dt` small enough (e.g., 1–30 s) to resolve switching cleanly.
+- Solver: RK4 (default) or forward Euler, both with step `dt_s`
+- Switching: pump state updates once per step (hysteresis) and is held constant during the RK4 sub-stages; choose `dt_s` small enough (e.g., 1–30 s) to resolve switching cleanly.
 - For fixed-step solvers, `duration_s` should be an integer multiple of `dt_s`.
 
 ## Parameters (Units)
@@ -107,7 +151,7 @@ The system is integrated forward in time using a fixed-step method on the tank t
 - `c_p` [J/(kg·K)]: fluid specific heat capacity
 - `m_tank` [kg]: tank fluid mass (`≈ ρ * V`)
 - `UAtank` [W/K]: tank heat-loss coefficient times area (lumped)
-- `dt` [s]: numerical time step for simulation
+- `dt_s` [s]: numerical time step for simulation
 - `G_min` [W/m²]: minimum irradiance for pump operation (optional)
 - `ΔT_on`, `ΔT_off` [K]: pump control deadband thresholds (optional)
 - `T_out,nom` [K]: nominal collector outlet temperature used for control decisions
@@ -118,6 +162,13 @@ Edit parameters in `resources/default_config.toml` and run:
 
 ```bash
 uv run passive-logic-simulator run --config resources/default_config.toml --output-csv out/simulation.csv
+```
+
+You can also run via Python module entrypoints:
+
+```bash
+uv run python -m passive_logic_simulator run --config resources/default_config.toml --output-csv out/simulation.csv
+uv run python main.py run --config resources/default_config.toml --output-csv out/simulation.csv
 ```
 
 To use Euler (for numerical error comparisons):
@@ -132,13 +183,21 @@ To start the demo webapp (backend + frontend):
 uv run passive-logic-simulator demo
 ```
 
-The output CSV contains:
+Demo notes:
+- Requires Node.js + `npm` (the first run will install frontend dependencies under `frontend/node_modules/`).
+- Backend serves on `http://localhost:8000`, frontend dev server on `http://localhost:5173` (both configurable via CLI flags).
 
-- `time_s`
-- `tank_temperature_k`
-- `ambient_temperature_k`
-- `irradiance_w_m2`
-- `pump_on` (0/1)
+## Python API
+
+For programmatic use (e.g., notebooks), the package exposes a small public API:
+
+```python
+from passive_logic_simulator import load_config, run_simulation
+
+config = load_config("resources/default_config.toml")
+result = run_simulation(config, solver="rk4")
+print(result.tank_temperature_k[-1])
+```
 
 ### Synthetic weather (default)
 

@@ -30,7 +30,7 @@ This repository uses a simple, thermodynamically grounded 0D model:
 
 ## Governing Equations
 
-Collector useful heat (Hottel–Whillier-style form):
+Collector useful heat modeled with the Hottel–Whillier–Bliss (HWB) equation:
 
 `Q_u = A * F_R * (eta0 * G(t) - U_L * (T_in - T_amb))`  [W]
 
@@ -45,7 +45,43 @@ Tank energy balance (well-mixed tank, loop return from tank):
 Notes:
 - Clamp `Q_u >= 0` (or turn pump off) if the collector would remove heat from the tank.
 - Use Kelvin for all temperatures (if inputs are in Celsius, add `273.15`).
-- A common control is a deadband: pump ON if `T_out,nom > T_tank + ΔT_on`, pump OFF if `T_out,nom < T_tank + ΔT_off`.
+- Pump control uses a deadband/hysteresis controller (see “Pump Control (Hysteresis)” below).
+
+### Collector Model Note (Evacuated Tube Collectors)
+
+The HWB form above is traditionally used for flat-plate collectors. For
+evacuated tube collectors, the underlying heat transfer mechanisms can be
+more complex (e.g., geometry effects and, in some designs/operating regimes,
+boiling/condensation), so the fitted HWB parameters may lose a strict physical
+interpretation and can even become negative during parameter identification.
+
+In practice, the HWB form can still work well as an empirical predictor of
+collector outlet temperature for evacuated tube collectors when its coefficients
+are identified from measurements. For discussion and a comparison with an
+“efficiency equation” (EE) model, see: https://www.mdpi.com/2673-4117/5/4/178
+
+### Pump Control (Hysteresis)
+
+The pump is modeled as an ideal on/off switch that sets the loop mass flow rate:
+
+- If the pump is on: `m_dot = m_dot,design`
+- If the pump is off: `m_dot = 0`
+
+If `control.enabled = false`, the pump is forced on (always circulating).
+
+If `control.enabled = true`, the pump state is updated once per simulation time step using hysteresis:
+
+1. Apply an irradiance gate: if `G(t) < G_min`, force the pump off.
+2. Compute a **nominal** outlet temperature `T_out,nom` assuming the pump is on at the design mass flow rate (this is used only for the control decision):
+
+   - `Q_u,nom = max(0, A * F_R * (eta0 * G(t) - U_L * (T_tank - T_amb)))`
+   - `T_out,nom = T_tank + Q_u,nom / (m_dot,design * c_p)`
+
+3. Apply deadband thresholds:
+   - Turn on if currently off and `T_out,nom > T_tank + ΔT_on`
+   - Stay on if currently on and `T_out,nom > T_tank + ΔT_off` (with `ΔT_off <= ΔT_on`)
+
+Within a time step, the computed pump state is held constant for the RK4 sub-steps.
 
 ## Numerical Integration
 
@@ -72,7 +108,9 @@ The system is integrated forward in time using a fixed-step 4th-order Runge–Ku
 - `m_tank` [kg]: tank fluid mass (`≈ ρ * V`)
 - `UAtank` [W/K]: tank heat-loss coefficient times area (lumped)
 - `dt` [s]: numerical time step for simulation
+- `G_min` [W/m²]: minimum irradiance for pump operation (optional)
 - `ΔT_on`, `ΔT_off` [K]: pump control deadband thresholds (optional)
+- `T_out,nom` [K]: nominal collector outlet temperature used for control decisions
 
 ## Usage
 

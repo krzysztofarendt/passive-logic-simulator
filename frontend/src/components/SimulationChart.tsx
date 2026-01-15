@@ -26,22 +26,14 @@ export const SimulationChart = memo(function SimulationChart({ result }: Simulat
   const [showAmbient, setShowAmbient] = useState(true);
   const [showPumpRegions, setShowPumpRegions] = useState(true);
 
-  if (!result) {
-    return (
-      <div className="bg-white rounded-lg shadow p-6 h-full flex items-center justify-center">
-        <p className="text-gray-500 text-center">
-          Configure parameters and click "Run Simulation" to see results.
-        </p>
-      </div>
-    );
-  }
-
   const tempLabel = tempUnit === "celsius" ? "C" : "K";
   const convertTemp = (k: number) =>
     tempUnit === "celsius" ? kelvinToCelsius(k) : k;
 
   // Transform data for Recharts - memoized to avoid recomputing on every render
+  // Returns empty array if result is null/invalid
   const chartData = useMemo(() => {
+    if (!result?.times_s?.length) return [];
     const toTemp = (k: number) =>
       tempUnit === "celsius" ? kelvinToCelsius(k) : k;
     return result.times_s.map((t, i) => ({
@@ -55,6 +47,7 @@ export const SimulationChart = memo(function SimulationChart({ result }: Simulat
 
   // Find pump-on regions for shading - memoized
   const pumpRegions = useMemo(() => {
+    if (chartData.length === 0) return [];
     const regions: { start: number; end: number }[] = [];
     let regionStart: number | null = null;
     for (let i = 0; i < chartData.length; i++) {
@@ -76,6 +69,7 @@ export const SimulationChart = memo(function SimulationChart({ result }: Simulat
 
   // Calculate min/max for temperature axis - memoized
   const { tempMin, tempMax } = useMemo(() => {
+    if (chartData.length === 0) return { tempMin: 0, tempMax: 100 };
     const allTemps = [
       ...chartData.map((d) => d.tank_temp),
       ...(showAmbient ? chartData.map((d) => d.ambient_temp) : []),
@@ -88,9 +82,31 @@ export const SimulationChart = memo(function SimulationChart({ result }: Simulat
 
   // Max irradiance for secondary axis - memoized
   const maxIrradiance = useMemo(
-    () => Math.max(...result.irradiance_w_m2),
+    () => (result?.irradiance_w_m2?.length ? Math.max(...result.irradiance_w_m2) : 1000),
     [result]
   );
+
+  // Now handle conditional rendering AFTER all hooks
+  if (!result) {
+    return (
+      <div className="bg-white rounded-lg shadow p-6 h-full flex items-center justify-center">
+        <p className="text-gray-500 text-center">
+          Configure parameters and click "Run Simulation" to see results.
+        </p>
+      </div>
+    );
+  }
+
+  // Defensive check: ensure result has valid data arrays
+  if (chartData.length === 0) {
+    return (
+      <div className="bg-white rounded-lg shadow p-6 h-full flex items-center justify-center">
+        <p className="text-red-500 text-center">
+          Invalid simulation result: missing or empty data arrays.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg shadow p-4 h-full flex flex-col">

@@ -1,8 +1,11 @@
+"""Tests for the pump hysteresis control logic."""
+
 from passive_logic_simulator.control import update_pump_state
 from passive_logic_simulator.params import CollectorParams, ControlParams, PumpParams, TankParams
 
 
 def _simple_params() -> tuple[CollectorParams, PumpParams, TankParams]:
+    """Return a small parameter set chosen to make the control algebra easy."""
     # Choose parameters that make the algebra easy:
     # Q_u = G (UL=0, A=FR=eta0=1), T_out = T_in + G (m_dot=cp=1).
     collector = CollectorParams(

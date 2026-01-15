@@ -1,3 +1,5 @@
+"""Tests for fixed-step ODE integrators."""
+
 import math
 
 from passive_logic_simulator.numerics import euler_step, rk4_step

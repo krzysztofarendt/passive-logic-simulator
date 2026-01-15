@@ -1,4 +1,11 @@
-"""Typed parameter sets for the physical model."""
+"""Typed parameter sets for the physical model.
+
+The simulator uses a small set of dataclasses to represent inputs. Parameters
+are validated on construction so that downstream simulation code can assume
+basic invariants (e.g., positive masses and time steps).
+
+All temperatures are in Kelvin (K).
+"""
 
 from __future__ import annotations
 
@@ -7,23 +14,27 @@ from dataclasses import dataclass
 
 
 def _require_finite(name: str, value: float) -> None:
+    """Validate that a numeric value is finite (not NaN/inf)."""
     if not math.isfinite(value):
         raise ValueError(f"{name} must be finite, got {value!r}")
 
 
 def _require_positive(name: str, value: float) -> None:
+    """Validate that a numeric value is finite and strictly positive."""
     _require_finite(name, value)
     if value <= 0.0:
         raise ValueError(f"{name} must be > 0, got {value!r}")
 
 
 def _require_non_negative(name: str, value: float) -> None:
+    """Validate that a numeric value is finite and non-negative."""
     _require_finite(name, value)
     if value < 0.0:
         raise ValueError(f"{name} must be >= 0, got {value!r}")
 
 
 def _require_unit_interval(name: str, value: float) -> None:
+    """Validate that a numeric value lies within the closed unit interval [0, 1]."""
     _require_finite(name, value)
     if not (0.0 <= value <= 1.0):
         raise ValueError(f"{name} must be in [0, 1], got {value!r}")

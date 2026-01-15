@@ -1,3 +1,5 @@
+"""Unit tests for TOML parsing helpers in `passive_logic_simulator.config`."""
+
 import pytest
 
 from passive_logic_simulator.config import _get_bool, _get_float, _get_str, _require_mapping

@@ -1,4 +1,7 @@
+"""Tests for config loading and end-to-end simulation behavior."""
+
 import textwrap
+from pathlib import Path
 from typing import Literal
 
 import pytest
@@ -7,7 +10,7 @@ from passive_logic_simulator.config import load_config
 from passive_logic_simulator.simulation import run_simulation
 
 
-def test_load_config_rejects_invalid_weather_extrapolation(tmp_path) -> None:
+def test_load_config_rejects_invalid_weather_extrapolation(tmp_path: Path) -> None:
     toml_path = tmp_path / "config.toml"
     toml_path.write_text(
         textwrap.dedent(
@@ -30,7 +33,7 @@ def test_load_config_rejects_invalid_weather_extrapolation(tmp_path) -> None:
 
 @pytest.mark.parametrize("solver", ["rk4", "euler"])
 def test_run_simulation_constant_inputs_matches_linear_solution(
-    tmp_path, solver: Literal["rk4", "euler"]
+    tmp_path: Path, solver: Literal["rk4", "euler"]
 ) -> None:
     # Create constant weather so collector heat is constant.
     weather_csv = tmp_path / "weather.csv"
@@ -94,7 +97,7 @@ def test_run_simulation_constant_inputs_matches_linear_solution(
     assert result.tank_temperature_k[-1] == pytest.approx(expected_final, abs=0.0)
 
 
-def test_run_simulation_requires_duration_multiple_of_dt(tmp_path) -> None:
+def test_run_simulation_requires_duration_multiple_of_dt(tmp_path: Path) -> None:
     config_toml = tmp_path / "config.toml"
     config_toml.write_text(
         textwrap.dedent(

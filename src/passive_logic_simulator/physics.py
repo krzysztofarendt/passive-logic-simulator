@@ -1,4 +1,9 @@
-"""Physics/energy balance functions for the lumped-parameter model."""
+"""Physics/energy balance functions for the lumped-parameter model.
+
+Conventions:
+- Temperatures are in Kelvin (K).
+- Heat rates are in Watts (W).
+"""
 
 from __future__ import annotations
 

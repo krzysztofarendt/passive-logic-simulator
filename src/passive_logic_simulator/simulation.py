@@ -34,7 +34,16 @@ SolverName = Literal["rk4", "euler"]
 
 
 def run_simulation(config: SimulationConfig, *, solver: SolverName = "rk4") -> SimulationResult:
-    """Run a transient simulation and return the full trajectory."""
+    """Run a transient simulation and return the full trajectory.
+
+    Args:
+        config: Fully specified simulation configuration.
+        solver: Fixed-step ODE solver for the tank state (`"rk4"` or `"euler"`).
+
+    Returns:
+        A `SimulationResult` containing one sample per time step, including the
+        initial state at `t0_s` and the final state at `t0_s + duration_s`.
+    """
     weather = build_weather(config.weather)
 
     times_s: list[float] = []

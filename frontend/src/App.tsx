@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { ParameterForm } from "./components/ParameterForm";
 import { SimulationChart } from "./components/SimulationChart";
+import { TabNavigation } from "./components/TabNavigation";
+import { SystemDiagram } from "./components/SystemDiagram";
+import { ErrorEstimationTab } from "./components/ErrorEstimationTab";
 import { runSimulation } from "./api/simulation";
-import type { SimulationConfig, SimulationResult } from "./types/simulation";
+import type { SimulationConfig, SimulationResult, TabId } from "./types/simulation";
 import { DEFAULT_CONFIG } from "./types/simulation";
 
 function App() {
+  const [activeTab, setActiveTab] = useState<TabId>("simulation");
   const [config, setConfig] = useState<SimulationConfig>(DEFAULT_CONFIG);
   const [result, setResult] = useState<SimulationResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -94,22 +98,33 @@ function App() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-12rem)]">
-          {/* Parameter Form - Left Side */}
-          <div className="lg:col-span-1 h-full">
-            <ParameterForm
-              config={config}
-              onChange={setConfig}
-              onSubmit={handleRunSimulation}
-              isLoading={isLoading}
-            />
-          </div>
+        {/* Tab Navigation */}
+        <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
-          {/* Chart - Right Side */}
-          <div className="lg:col-span-2 h-full min-h-[500px]">
-            <SimulationChart result={result} />
+        {/* Tab Content */}
+        {activeTab === "simulation" ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-14rem)]">
+            {/* Parameter Form - Left Side */}
+            <div className="lg:col-span-1 h-full">
+              <ParameterForm
+                config={config}
+                onChange={setConfig}
+                onSubmit={handleRunSimulation}
+                isLoading={isLoading}
+              />
+            </div>
+
+            {/* Chart Area - Right Side */}
+            <div className="lg:col-span-2 h-full min-h-[500px] flex flex-col gap-4">
+              <SystemDiagram />
+              <div className="flex-1">
+                <SimulationChart result={result} />
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          <ErrorEstimationTab config={config} onConfigChange={setConfig} />
+        )}
       </main>
     </div>
   );

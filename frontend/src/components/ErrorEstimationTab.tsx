@@ -52,7 +52,7 @@ export function ErrorEstimationTab({ config, onConfigChange }: ErrorEstimationTa
       <div className="lg:col-span-2">
         <div className="bg-white rounded-lg shadow p-4">
           <h2 className="text-lg font-bold text-gray-900 mb-4">
-            Error Estimation Parameters
+            Analysis Parameters
           </h2>
 
           <p className="text-sm text-gray-600 mb-6">

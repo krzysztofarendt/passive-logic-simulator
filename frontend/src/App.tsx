@@ -34,30 +34,51 @@ function App() {
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-[1600px] mx-auto px-6 py-4">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center">
+          <div className="flex items-center">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center">
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">
+                  Solar Thermal Simulation
+                </h1>
+                <p className="text-sm text-gray-500">
+                  Collector + Pump + Storage Tank
+                </p>
+              </div>
+            </div>
+
+            <a
+              className="ml-auto inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors"
+              href="https://github.com/krzysztofarendt/passive-logic-simulator"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="View source on GitHub"
+              title="View source on GitHub"
+            >
               <svg
-                className="w-8 h-8 text-white"
-                fill="none"
-                stroke="currentColor"
+                className="w-6 h-6"
                 viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                />
+                <path d="M12 2C6.477 2 2 6.484 2 12.02c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.009-.866-.014-1.7-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.987 1.03-2.686-.103-.253-.447-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.57 9.57 0 0 1 2.504.337c1.909-1.296 2.748-1.026 2.748-1.026.546 1.378.202 2.397.1 2.65.64.699 1.028 1.593 1.028 2.686 0 3.848-2.338 4.695-4.566 4.943.359.31.678.92.678 1.853 0 1.337-.012 2.415-.012 2.743 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12.02C22 6.484 17.523 2 12 2Z" />
               </svg>
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">
-                Solar Thermal Simulation
-              </h1>
-              <p className="text-sm text-gray-500">
-                Collector + Pump + Storage Tank
-              </p>
-            </div>
+              <span className="hidden sm:inline">GitHub</span>
+            </a>
           </div>
         </div>
       </header>

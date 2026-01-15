@@ -7,7 +7,7 @@ interface TabNavigationProps {
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "simulation", label: "Simulation" },
-  { id: "error-estimation", label: "Numerical Error Estimation" },
+  { id: "error-estimation", label: "Method Sensitivity Analysis" },
   { id: "documentation", label: "Documentation" },
 ];
 

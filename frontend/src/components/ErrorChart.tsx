@@ -75,36 +75,42 @@ export function ErrorChart({ result }: ErrorChartProps) {
         <h4 className="text-sm font-medium text-gray-700 mb-2">
           Temperature Error (T_euler - T_rk4)
         </h4>
-        <ResponsiveContainer width="100%" height={150}>
-          <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis
-              dataKey="time_h"
-              label={{ value: "Time (h)", position: "insideBottomRight", offset: -5 }}
-              tickFormatter={(v) => v.toFixed(0)}
-              stroke="#6b7280"
-              fontSize={11}
-            />
-            <YAxis
-              label={{ value: "Error (K)", angle: -90, position: "insideLeft" }}
-              stroke="#6b7280"
-              fontSize={11}
-              tickFormatter={(v) => v.toFixed(3)}
-            />
-            <Tooltip
-              formatter={(value) => [typeof value === "number" ? value.toFixed(4) + " K" : "-", "Temp Error"]}
-              labelFormatter={(label) => `Time: ${Number(label).toFixed(2)} h`}
-            />
-            <Line
-              type="monotone"
-              dataKey="temp_error_k"
-              stroke="#ef4444"
-              strokeWidth={1.5}
-              dot={false}
-              name="Temperature Error"
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <div className="flex items-center">
+          <div className="flex-shrink-0 w-16 text-xs text-gray-600 text-center">
+            Error (K)
+          </div>
+          <div className="flex-1 min-w-0">
+            <ResponsiveContainer width="100%" height={150}>
+              <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis
+                  dataKey="time_h"
+                  label={{ value: "Time (h)", position: "insideBottomRight", offset: -5 }}
+                  tickFormatter={(v) => v.toFixed(0)}
+                  stroke="#6b7280"
+                  fontSize={11}
+                />
+                <YAxis
+                  stroke="#6b7280"
+                  fontSize={11}
+                  tickFormatter={(v) => v.toFixed(3)}
+                />
+                <Tooltip
+                  formatter={(value) => [typeof value === "number" ? value.toFixed(4) + " K" : "-", "Temp Error"]}
+                  labelFormatter={(label) => `Time: ${Number(label).toFixed(2)} h`}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="temp_error_k"
+                  stroke="#ef4444"
+                  strokeWidth={1.5}
+                  dot={false}
+                  name="Temperature Error"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </div>
 
       {/* Energy Error Chart */}
@@ -112,36 +118,42 @@ export function ErrorChart({ result }: ErrorChartProps) {
         <h4 className="text-sm font-medium text-gray-700 mb-2">
           Cumulative Energy Error
         </h4>
-        <ResponsiveContainer width="100%" height={150}>
-          <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis
-              dataKey="time_h"
-              label={{ value: "Time (h)", position: "insideBottomRight", offset: -5 }}
-              tickFormatter={(v) => v.toFixed(0)}
-              stroke="#6b7280"
-              fontSize={11}
-            />
-            <YAxis
-              label={{ value: "Error (kJ)", angle: -90, position: "insideLeft" }}
-              stroke="#6b7280"
-              fontSize={11}
-              tickFormatter={(v) => v.toFixed(0)}
-            />
-            <Tooltip
-              formatter={(value) => [typeof value === "number" ? value.toFixed(2) + " kJ" : "-", "Energy Error"]}
-              labelFormatter={(label) => `Time: ${Number(label).toFixed(2)} h`}
-            />
-            <Line
-              type="monotone"
-              dataKey="energy_error_kj"
-              stroke="#f59e0b"
-              strokeWidth={1.5}
-              dot={false}
-              name="Energy Error"
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <div className="flex items-center">
+          <div className="flex-shrink-0 w-16 text-xs text-gray-600 text-center">
+            Error (kJ)
+          </div>
+          <div className="flex-1 min-w-0">
+            <ResponsiveContainer width="100%" height={150}>
+              <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis
+                  dataKey="time_h"
+                  label={{ value: "Time (h)", position: "insideBottomRight", offset: -5 }}
+                  tickFormatter={(v) => v.toFixed(0)}
+                  stroke="#6b7280"
+                  fontSize={11}
+                />
+                <YAxis
+                  stroke="#6b7280"
+                  fontSize={11}
+                  tickFormatter={(v) => v.toFixed(0)}
+                />
+                <Tooltip
+                  formatter={(value) => [typeof value === "number" ? value.toFixed(2) + " kJ" : "-", "Energy Error"]}
+                  labelFormatter={(label) => `Time: ${Number(label).toFixed(2)} h`}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="energy_error_kj"
+                  stroke="#f59e0b"
+                  strokeWidth={1.5}
+                  dot={false}
+                  name="Energy Error"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </div>
 
       {/* Summary Statistics */}

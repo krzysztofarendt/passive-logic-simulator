@@ -133,6 +133,14 @@ export function hoursToSeconds(h: number): number {
   return h * 3600;
 }
 
+export const MAX_SIMULATION_DURATION_DAYS = 10;
+export const MAX_SIMULATION_DURATION_HOURS = MAX_SIMULATION_DURATION_DAYS * 24;
+export const MAX_SIMULATION_DURATION_S = MAX_SIMULATION_DURATION_HOURS * 3600;
+
+export function is_duration_within_limits(duration_s: number): boolean {
+  return duration_s <= MAX_SIMULATION_DURATION_S;
+}
+
 /** Error comparison result from Euler vs RK4 */
 export interface ErrorComparisonResult {
   times_s: number[];
@@ -177,7 +185,7 @@ export const PARAMETER_HELP: Record<string, string> = {
   // Simulation
   "simulation.t0_s": "Simulation start time (seconds from midnight)",
   "simulation.dt_s": "Integration time step. Smaller values = more accurate but slower",
-  "simulation.duration_s": "Total simulation duration",
+  "simulation.duration_s": `Total simulation duration (max ${MAX_SIMULATION_DURATION_DAYS} days)`,
 
   // Weather
   "weather.sunrise_s": "Time of sunrise (seconds from midnight). Default 21600 = 6:00 AM",

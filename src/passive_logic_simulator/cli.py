@@ -146,8 +146,7 @@ def _run_webapp(
         subprocess.run(["npm", "install"], cwd=frontend_dir, check=True)
 
     if prod:
-        typer.echo(f"Starting backend in PRODUCTION mode on http://0.0.0.0:{backend_port}")
-        typer.echo("Press Ctrl+C to stop.\n")
+        typer.echo("Preparing production demo (build + serve static frontend)...")
     else:
         typer.echo(f"Starting backend on http://localhost:{backend_port}")
         typer.echo(f"Starting frontend on http://localhost:{frontend_port}")
@@ -173,6 +172,17 @@ def _run_webapp(
     signal.signal(signal.SIGTERM, cleanup)
 
     try:
+        # In production, ensure the frontend is built before starting the backend.
+        # The backend mounts static routes at import time, so it must see `frontend/dist`.
+        if prod:
+            dist_dir = frontend_dir / "dist"
+            if not dist_dir.exists():
+                typer.echo("Building frontend for production...")
+                subprocess.run(["npm", "run", "build"], cwd=frontend_dir, check=True)
+            typer.echo(f"Serving static files from {dist_dir}")
+            typer.echo(f"Starting backend in PRODUCTION mode on http://0.0.0.0:{backend_port}")
+            typer.echo("Press Ctrl+C to stop.\n")
+
         # Start backend (uvicorn)
         backend_cmd = [
             sys.executable,
@@ -190,17 +200,10 @@ def _run_webapp(
         processes.append(backend_proc)
 
         # Start frontend
-        if prod:
-            # In production, build static assets (if not already built)
-            dist_dir = frontend_dir / "dist"
-            if not dist_dir.exists():
-                typer.echo("Building frontend for production...")
-                subprocess.run(["npm", "run", "build"], cwd=frontend_dir, check=True)
-            typer.echo(f"Serving static files from {dist_dir}")
-            typer.echo("(Frontend is built; access via backend at the same port)")
-        else:
+        if not prod:
             # Development mode: run Vite dev server
             frontend_env = os.environ.copy()
+            frontend_env.setdefault("VITE_API_URL", f"http://127.0.0.1:{backend_port}")
             frontend_proc = subprocess.Popen(
                 ["npm", "run", "dev", "--", "--port", str(frontend_port)],
                 cwd=frontend_dir,

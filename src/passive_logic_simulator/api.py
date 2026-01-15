@@ -230,7 +230,8 @@ if _frontend_dist.exists():
     @app.get("/{path:path}")
     def serve_spa(path: str) -> FileResponse:
         """Serve the SPA index.html for client-side routing."""
-        file_path = _frontend_dist / path
-        if file_path.exists() and file_path.is_file():
-            return FileResponse(file_path)
+        dist_root = _frontend_dist.resolve()
+        requested_path = (dist_root / path).resolve()
+        if requested_path.is_relative_to(dist_root) and requested_path.exists() and requested_path.is_file():
+            return FileResponse(requested_path)
         return FileResponse(_frontend_dist / "index.html")

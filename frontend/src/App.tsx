@@ -7,7 +7,12 @@ import { ErrorEstimationTab } from "./components/ErrorEstimationTab";
 import { DocumentationTab } from "./components/DocumentationTab";
 import { runSimulation } from "./api/simulation";
 import type { SimulationConfig, SimulationResult, TabId } from "./types/simulation";
-import { DEFAULT_CONFIG } from "./types/simulation";
+import {
+  DEFAULT_CONFIG,
+  is_duration_within_limits,
+  MAX_SIMULATION_DURATION_DAYS,
+  MAX_SIMULATION_DURATION_HOURS,
+} from "./types/simulation";
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>("simulation");
@@ -20,6 +25,12 @@ function App() {
     setIsLoading(true);
     setError(null);
     try {
+      if (!is_duration_within_limits(config.simulation.duration_s)) {
+        setError(
+          `Simulation duration is limited to ${MAX_SIMULATION_DURATION_DAYS} days (${MAX_SIMULATION_DURATION_HOURS} h).`
+        );
+        return;
+      }
       const simulationResult = await runSimulation(config);
       setResult(simulationResult);
     } catch (err) {

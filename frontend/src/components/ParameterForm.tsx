@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef, memo } from "react";
 import type { SimulationConfig } from "../types/simulation";
-import { hoursToSeconds, PARAMETER_HELP, secondsToHours } from "../types/simulation";
+import {
+  hoursToSeconds,
+  MAX_SIMULATION_DURATION_HOURS,
+  PARAMETER_HELP,
+  secondsToHours,
+} from "../types/simulation";
 import { Tooltip } from "./Tooltip";
 
 interface ParameterFormProps {
@@ -404,6 +409,7 @@ export function ParameterForm({
               value={secondsToHours(config.simulation.duration_s)}
               onChange={(v) => updateSimulation("duration_s", hoursToSeconds(v as number))}
               min={0.01}
+              max={MAX_SIMULATION_DURATION_HOURS}
               step={1}
               help={PARAMETER_HELP["simulation.duration_s"]}
             />

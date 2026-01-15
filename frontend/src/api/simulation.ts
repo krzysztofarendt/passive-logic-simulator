@@ -9,11 +9,59 @@ import type {
   ErrorComparisonResult,
   ErrorStatistics,
 } from "../types/simulation";
+import { MAX_SIMULATION_DURATION_DAYS, MAX_SIMULATION_DURATION_HOURS } from "../types/simulation";
 
 // Use environment variable for production, fallback to localhost for development.
 // In production, set VITE_API_URL to your backend URL (e.g., "https://api.example.com")
 // or leave empty to use relative URLs (same origin).
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? "";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ??
+  (import.meta.env.DEV ? "http://localhost:8000" : "");
+
+type FastApiValidationIssue = {
+  loc?: unknown;
+  msg?: unknown;
+};
+
+function _format_validation_error(detail: unknown): string {
+  if (!Array.isArray(detail) || detail.length === 0) return "Request validation failed";
+
+  const messages: string[] = [];
+  for (const rawIssue of detail) {
+    const issue = rawIssue as FastApiValidationIssue;
+    const msg = typeof issue.msg === "string" ? issue.msg : "Invalid value";
+
+    const locParts = Array.isArray(issue.loc)
+      ? issue.loc
+          .filter((p) => typeof p === "string" || typeof p === "number")
+          .map(String)
+          .filter((p) => p !== "body" && p !== "query" && p !== "path")
+      : [];
+
+    const loc = locParts.join(".");
+    if (loc.endsWith("simulation.duration_s")) {
+      messages.push(
+        `Simulation duration is limited to ${MAX_SIMULATION_DURATION_DAYS} days (${MAX_SIMULATION_DURATION_HOURS} h).`
+      );
+      continue;
+    }
+
+    messages.push(loc ? `${loc}: ${msg}` : msg);
+  }
+
+  return messages.join(" ");
+}
+
+function _format_api_error(detail: unknown, status: number): string {
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) return _format_validation_error(detail);
+  if (detail && typeof detail === "object" && "detail" in detail) {
+    const nested = (detail as { detail?: unknown }).detail;
+    if (typeof nested === "string") return nested;
+    if (Array.isArray(nested)) return _format_validation_error(nested);
+  }
+  return `Request failed (HTTP ${status})`;
+}
 
 export async function runSimulation(
   config: SimulationConfig,
@@ -39,8 +87,8 @@ export async function runSimulation(
   }
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: "Unknown error" }));
-    throw new Error(error.detail || `HTTP ${response.status}`);
+    const errorBody = await response.json().catch(() => ({ detail: "Unknown error" }));
+    throw new Error(_format_api_error((errorBody as { detail?: unknown }).detail, response.status));
   }
 
   const result = await response.json();

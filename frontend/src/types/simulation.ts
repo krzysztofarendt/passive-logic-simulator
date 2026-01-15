@@ -161,11 +161,11 @@ export const PARAMETER_HELP: Record<string, string> = {
   "tank.room_temperature_k": "Indoor temperature where the tank is located (for heat loss calculation)",
 
   // Pump
-  "pump.mass_flow_kg_s": "Water flow rate through the collector loop when pump is running",
+  "pump.mass_flow_kg_s": "Water flow rate through the collector loop when pump is running.\n\nIn this simplified model, higher flow mainly reduces the collector temperature lift:\nΔT ≈ Qᵤ / (ṁ · cₚ).\nSo higher flow can delay pump turn-on (needs higher irradiance to exceed ΔT_on) and shorten the on-window.\nTip: if the pump starts too late, lower flow or reduce ΔT_on/ΔT_off.",
 
   // Control - detailed explanations
   "control.enabled": "Enable/disable hysteresis pump control. When disabled, pump runs continuously during daylight.",
-  "control.delta_t_on_k": "Pump turns ON when collector is this much hotter than tank (T_collector - T_tank > ΔT_on). Higher values prevent pump from starting until collector is significantly warmer.",
+  "control.delta_t_on_k": "Pump turns ON when collector is this much hotter than tank (T_collector - T_tank > ΔT_on). Higher values delay turn-on. Note: higher mass flow reduces (T_collector - T_tank), which can also delay turn-on.",
   "control.delta_t_off_k": "Pump turns OFF when temperature difference drops below this threshold. Must be less than ΔT_on to create hysteresis band and prevent rapid cycling.",
   "control.min_irradiance_w_m2": "Minimum solar irradiance required for pump operation. Prevents pump from running during low-light conditions.",
 

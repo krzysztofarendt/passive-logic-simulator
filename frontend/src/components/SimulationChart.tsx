@@ -32,17 +32,39 @@ export const SimulationChart = memo(function SimulationChart({ result }: Simulat
 
   // Transform data for Recharts - memoized to avoid recomputing on every render
   // Returns empty array if result is null/invalid
+  // Downsamples to MAX_CHART_POINTS for performance
+  const MAX_CHART_POINTS = 500;
   const chartData = useMemo(() => {
     if (!result?.times_s?.length) return [];
     const toTemp = (k: number) =>
       tempUnit === "celsius" ? kelvinToCelsius(k) : k;
-    return result.times_s.map((t, i) => ({
-      time_h: secondsToHours(t),
-      tank_temp: toTemp(result.tank_temperature_k[i]),
-      ambient_temp: toTemp(result.ambient_temperature_k[i]),
-      irradiance: result.irradiance_w_m2[i],
-      pump_on: result.pump_on[i],
-    }));
+
+    const totalPoints = result.times_s.length;
+    // Downsample if we have too many points
+    const step = totalPoints > MAX_CHART_POINTS ? Math.ceil(totalPoints / MAX_CHART_POINTS) : 1;
+
+    const data = [];
+    for (let i = 0; i < totalPoints; i += step) {
+      data.push({
+        time_h: secondsToHours(result.times_s[i]),
+        tank_temp: toTemp(result.tank_temperature_k[i]),
+        ambient_temp: toTemp(result.ambient_temperature_k[i]),
+        irradiance: result.irradiance_w_m2[i],
+        pump_on: result.pump_on[i],
+      });
+    }
+    // Always include the last point for accurate final values
+    if (step > 1 && (totalPoints - 1) % step !== 0) {
+      const lastIdx = totalPoints - 1;
+      data.push({
+        time_h: secondsToHours(result.times_s[lastIdx]),
+        tank_temp: toTemp(result.tank_temperature_k[lastIdx]),
+        ambient_temp: toTemp(result.ambient_temperature_k[lastIdx]),
+        irradiance: result.irradiance_w_m2[lastIdx],
+        pump_on: result.pump_on[lastIdx],
+      });
+    }
+    return data;
   }, [result, tempUnit]);
 
   // Find pump-on regions for shading - memoized

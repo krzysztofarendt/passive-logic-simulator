@@ -19,25 +19,6 @@ app = typer.Typer(
     name="passive-logic-simulator",
     help="Solar thermal simulation: collector + pump + storage tank",
 )
-demo_app = typer.Typer(help="Demo commands for running the application", invoke_without_command=True)
-app.add_typer(demo_app, name="demo")
-
-@demo_app.callback()
-def demo(
-    ctx: typer.Context,
-    backend_port: Annotated[
-        int,
-        typer.Option("--backend-port", "-b", help="Port for the FastAPI backend"),
-    ] = 8000,
-    frontend_port: Annotated[
-        int,
-        typer.Option("--frontend-port", "-f", help="Port for the Vite frontend"),
-    ] = 5173,
-) -> None:
-    """Start the demo webapp (backend + frontend)."""
-    if ctx.invoked_subcommand is not None:
-        return
-    webapp(backend_port=backend_port, frontend_port=frontend_port)
 
 
 def _write_results_csv(
@@ -122,9 +103,7 @@ def run(
     typer.echo(f"Wrote {output_csv}")
     typer.echo(f"Final tank temperature: {result.tank_temperature_k[-1]:.2f} K")
 
-
-@demo_app.command()
-def webapp(
+def _run_webapp(
     backend_port: Annotated[
         int,
         typer.Option("--backend-port", "-b", help="Port for the FastAPI backend"),
@@ -215,6 +194,21 @@ def webapp(
         typer.echo(f"Error: {e}", err=True)
         cleanup()
         raise typer.Exit(1)
+
+
+@app.command()
+def demo(
+    backend_port: Annotated[
+        int,
+        typer.Option("--backend-port", "-b", help="Port for the FastAPI backend"),
+    ] = 8000,
+    frontend_port: Annotated[
+        int,
+        typer.Option("--frontend-port", "-f", help="Port for the Vite frontend"),
+    ] = 5173,
+) -> None:
+    """Start the demo webapp (backend + frontend)."""
+    _run_webapp(backend_port=backend_port, frontend_port=frontend_port)
 
 
 def main(argv: list[str] | None = None) -> None:

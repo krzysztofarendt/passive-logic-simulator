@@ -1,4 +1,4 @@
-# Solar Collector Simulator
+# Solar Thermal Simulation
 
 ## Problem
 

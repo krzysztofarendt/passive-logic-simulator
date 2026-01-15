@@ -23,7 +23,7 @@ export async function runSimulation(
     // Network errors (e.g., backend not running)
     throw new Error(
       `Cannot connect to simulation server at ${API_BASE_URL}. ` +
-      `Make sure the backend is running with: uv run passive-logic-simulator demo webapp`
+      `Make sure the backend is running with: uv run passive-logic-simulator demo`
     );
   }
 

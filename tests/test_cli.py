@@ -104,3 +104,10 @@ def test_cli_main_accepts_euler_solver(tmp_path: Path) -> None:
     )
     assert result.exit_code == 0
     assert output_csv.exists()
+
+
+def test_demo_help_shows_ports() -> None:
+    result = runner.invoke(app, ["demo", "--help"])
+    assert result.exit_code == 0
+    assert "--backend-port" in result.stdout
+    assert "--frontend-port" in result.stdout

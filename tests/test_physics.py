@@ -1,3 +1,5 @@
+"""Tests for core physics/energy balance helper functions."""
+
 import math
 
 from passive_logic_simulator.params import CollectorParams, TankParams

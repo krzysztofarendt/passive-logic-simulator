@@ -1,4 +1,7 @@
+"""Tests for synthetic and CSV-backed weather models."""
+
 import math
+from pathlib import Path
 
 import pytest
 
@@ -50,7 +53,7 @@ def test_build_weather_synthetic() -> None:
     assert w.ambient_temperature_k(123.0) == 300.0
 
 
-def test_build_weather_csv(tmp_path) -> None:
+def test_build_weather_csv(tmp_path: Path) -> None:
     csv_path = tmp_path / "weather.csv"
     csv_path.write_text(
         "time_s,irradiance_w_m2,ambient_k\n0,0,300\n10,10,310\n",
@@ -61,7 +64,7 @@ def test_build_weather_csv(tmp_path) -> None:
     assert w.ambient_temperature_k(5.0) == 305.0
 
 
-def test_build_weather_csv_requires_enough_rows(tmp_path) -> None:
+def test_build_weather_csv_requires_enough_rows(tmp_path: Path) -> None:
     csv_path = tmp_path / "weather.csv"
     csv_path.write_text("time_s,irradiance_w_m2,ambient_k\n0,0,300\n", encoding="utf-8")
     with pytest.raises(ValueError, match="at least 2 rows"):

@@ -1,3 +1,11 @@
+"""CLI-related tests.
+
+These tests focus on:
+- CSV export formatting
+- Command registration
+- Basic argument handling for the `run` and `demo` commands
+"""
+
 import csv
 import textwrap
 from pathlib import Path

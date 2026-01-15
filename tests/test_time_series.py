@@ -1,3 +1,5 @@
+"""Tests for the `TimeSeries` interpolation utility."""
+
 import pytest
 
 from passive_logic_simulator.time_series import TimeSeries

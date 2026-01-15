@@ -1,5 +1,4 @@
-"""
-Minimal time-series utilities used by the simulator.
+"""Minimal time-series utilities used by the simulator.
 
 The simulator needs to query weather inputs as functions of time, e.g. `G(t)` and
 `T_amb(t)`. This module provides a small, dependency-free helper for piecewise

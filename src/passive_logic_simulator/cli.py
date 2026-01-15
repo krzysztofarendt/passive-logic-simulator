@@ -1,4 +1,10 @@
-"""Command-line interface for running the simulation and exporting results."""
+"""Command-line interface for running the simulator.
+
+This module exposes a small `typer` app with two primary commands:
+
+- `run`: load a TOML config, run the transient model, and write results to CSV.
+- `demo`: start the FastAPI backend and Vite frontend (dev mode).
+"""
 
 from __future__ import annotations
 
@@ -7,6 +13,7 @@ import os
 import signal
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Annotated, Literal, Optional
 
@@ -103,6 +110,7 @@ def run(
     typer.echo(f"Wrote {output_csv}")
     typer.echo(f"Final tank temperature: {result.tank_temperature_k[-1]:.2f} K")
 
+
 def _run_webapp(
     backend_port: Annotated[
         int,
@@ -113,9 +121,14 @@ def _run_webapp(
         typer.Option("--frontend-port", "-f", help="Port for the Vite frontend"),
     ] = 5173,
 ) -> None:
-    """Start the backend API server and frontend development server."""
-    # Find the project root (where frontend/ directory is)
-    # cli.py is at src/passive_logic_simulator/cli.py, so go up 3 levels
+    """Start the backend API server and frontend development server.
+
+    This is intended for local development of the demo UI. It assumes:
+    - Node.js and npm are installed (for the frontend)
+    - Python dependencies include `uvicorn` (for the backend)
+    """
+    # Find the project root (where `frontend/` lives).
+    # `cli.py` is `src/passive_logic_simulator/cli.py`, so go up 3 levels.
     project_root = Path(__file__).parent.parent.parent
     frontend_dir = project_root / "frontend"
 
@@ -136,6 +149,7 @@ def _run_webapp(
 
     def cleanup(signum: Optional[int] = None, frame: Optional[object] = None) -> None:
         """Terminate all child processes."""
+        _ = frame  # Part of the signal handler signature; unused.
         for proc in processes:
             if proc.poll() is None:
                 proc.terminate()
@@ -185,9 +199,7 @@ def _run_webapp(
                     typer.echo(f"Process exited with code {retcode}")
                     cleanup()
                     raise typer.Exit(retcode if retcode else 0)
-            # Small sleep to avoid busy-waiting
-            import time
-
+            # Small sleep to avoid busy-waiting.
             time.sleep(0.5)
 
     except Exception as e:
@@ -212,11 +224,14 @@ def demo(
 
 
 def main(argv: list[str] | None = None) -> None:
-    """Entry point for the CLI."""
+    """Entry point for the CLI.
+
+    Args:
+        argv: Optional argv list (without the program name). If provided, this
+            function temporarily overrides `sys.argv` for testability.
+    """
     if argv is not None:
         # For testing: override sys.argv
-        import sys
-
         original_argv = sys.argv
         sys.argv = ["passive-logic-simulator"] + argv
         try:

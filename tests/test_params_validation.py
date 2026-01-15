@@ -1,3 +1,5 @@
+"""Tests for dataclass parameter validation."""
+
 import pytest
 
 from passive_logic_simulator.params import CollectorParams, ControlParams, PumpParams, SimulationParams, TankParams

@@ -1,4 +1,10 @@
-"""Pump control logic (hysteresis / deadband)."""
+"""Pump control logic (hysteresis / deadband).
+
+The pump state is updated once per simulation step (and held constant within
+that step, including RK4 sub-stages). This matches the project convention in
+`AGENTS.md` and keeps the discrete control logic separated from the continuous
+tank ODE integration.
+"""
 
 from __future__ import annotations
 
@@ -23,6 +29,11 @@ def update_pump_state(
     - Requires minimum irradiance before the pump can run.
     - Computes a nominal collector outlet temperature assuming the pump is on.
     - Uses ON/OFF deadband thresholds to avoid rapid switching.
+
+    Notes:
+        If `control.enabled` is `False`, the controller is bypassed and the pump
+        is forced on. This is useful for deterministic tests and "always-on"
+        scenarios.
     """
     if not control.enabled:
         return True

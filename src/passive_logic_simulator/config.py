@@ -2,6 +2,9 @@
 
 The config file is designed to be front-end friendly (simple scalar fields and
 tables), so it can be mirrored later in a web UI and sent to a backend.
+
+All temperatures are in Kelvin (K). See `README.md` for the full parameter
+definitions and units.
 """
 
 from __future__ import annotations
@@ -35,14 +38,26 @@ class SimulationConfig:
 
 
 def _require_mapping(value: Any, *, key_path: str) -> dict[str, Any]:
-    """Validate that a TOML value is a table (dict-like mapping)."""
+    """Validate that a TOML value is a table (dict-like mapping).
+
+    Args:
+        value: Parsed TOML value.
+        key_path: Dotted key path used for error messages.
+    """
     if not isinstance(value, dict):
         raise ValueError(f"Expected table at '{key_path}', got {type(value).__name__}")
     return value
 
 
 def _get_float(table: dict[str, Any], key: str, *, default: float | None = None, key_path: str) -> float:
-    """Read a float from a TOML table, with basic type validation."""
+    """Read a numeric value from a TOML table.
+
+    Args:
+        table: Parsed TOML table.
+        key: Field name within the table.
+        default: Optional default to use when `key` is missing.
+        key_path: Dotted key path used for error messages.
+    """
     if key in table:
         value = table[key]
         if isinstance(value, (int, float)):
@@ -54,7 +69,7 @@ def _get_float(table: dict[str, Any], key: str, *, default: float | None = None,
 
 
 def _get_bool(table: dict[str, Any], key: str, *, default: bool | None = None, key_path: str) -> bool:
-    """Read a boolean from a TOML table, with basic type validation."""
+    """Read a boolean value from a TOML table."""
     if key in table:
         value = table[key]
         if isinstance(value, bool):
@@ -66,7 +81,7 @@ def _get_bool(table: dict[str, Any], key: str, *, default: bool | None = None, k
 
 
 def _get_str(table: dict[str, Any], key: str, *, default: str | None = None, key_path: str) -> str:
-    """Read a string from a TOML table, with basic type validation."""
+    """Read a string value from a TOML table."""
     if key in table:
         value = table[key]
         if isinstance(value, str):

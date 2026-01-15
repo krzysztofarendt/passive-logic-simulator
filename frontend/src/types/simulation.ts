@@ -118,6 +118,11 @@ export function celsiusToKelvin(c: number): number {
   return c + 273.15;
 }
 
+/** Convert Kelvin to Fahrenheit */
+export function kelvinToFahrenheit(k: number): number {
+  return (k - 273.15) * 9 / 5 + 32;
+}
+
 /** Convert seconds to hours */
 export function secondsToHours(s: number): number {
   return s / 3600;

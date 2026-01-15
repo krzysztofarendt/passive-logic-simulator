@@ -12,13 +12,13 @@ import {
   ReferenceArea,
 } from "recharts";
 import type { SimulationResult } from "../types/simulation";
-import { kelvinToCelsius, secondsToHours } from "../types/simulation";
+import { kelvinToCelsius, kelvinToFahrenheit, secondsToHours } from "../types/simulation";
 
 interface SimulationChartProps {
   result: SimulationResult | null;
 }
 
-type TemperatureUnit = "celsius" | "kelvin";
+type TemperatureUnit = "celsius" | "kelvin" | "fahrenheit";
 
 export const SimulationChart = memo(function SimulationChart({ result }: SimulationChartProps) {
   const [tempUnit, setTempUnit] = useState<TemperatureUnit>("celsius");
@@ -26,9 +26,9 @@ export const SimulationChart = memo(function SimulationChart({ result }: Simulat
   const [showAmbient, setShowAmbient] = useState(true);
   const [showPumpRegions, setShowPumpRegions] = useState(true);
 
-  const tempLabel = tempUnit === "celsius" ? "C" : "K";
+  const tempLabel = tempUnit === "celsius" ? "C" : tempUnit === "fahrenheit" ? "F" : "K";
   const convertTemp = (k: number) =>
-    tempUnit === "celsius" ? kelvinToCelsius(k) : k;
+    tempUnit === "celsius" ? kelvinToCelsius(k) : tempUnit === "fahrenheit" ? kelvinToFahrenheit(k) : k;
 
   // Transform data for Recharts - memoized to avoid recomputing on every render
   // Returns empty array if result is null/invalid
@@ -37,7 +37,7 @@ export const SimulationChart = memo(function SimulationChart({ result }: Simulat
   const chartData = useMemo(() => {
     if (!result?.times_s?.length) return [];
     const toTemp = (k: number) =>
-      tempUnit === "celsius" ? kelvinToCelsius(k) : k;
+      tempUnit === "celsius" ? kelvinToCelsius(k) : tempUnit === "fahrenheit" ? kelvinToFahrenheit(k) : k;
 
     const totalPoints = result.times_s.length;
     // Downsample if we have too many points
@@ -168,6 +168,7 @@ export const SimulationChart = memo(function SimulationChart({ result }: Simulat
             className="px-2 py-1 border border-gray-300 rounded text-sm"
           >
             <option value="celsius">Celsius</option>
+            <option value="fahrenheit">Fahrenheit</option>
             <option value="kelvin">Kelvin</option>
           </select>
         </div>
@@ -175,7 +176,7 @@ export const SimulationChart = memo(function SimulationChart({ result }: Simulat
 
       <div className="h-[350px]">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData} margin={{ top: 5, right: 60, left: 0, bottom: 5 }}>
+          <LineChart data={chartData} margin={{ top: 5, right: 60, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis
               dataKey="time_h"

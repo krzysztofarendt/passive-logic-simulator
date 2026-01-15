@@ -15,6 +15,8 @@ from typing import Protocol, TypeAlias
 
 from passive_logic_simulator.time_series import ExtrapolationMode, TimeSeries
 
+SECONDS_PER_DAY = 24.0 * 3600.0
+
 
 class Weather(Protocol):
     """Callable weather interface used by the simulator."""
@@ -72,8 +74,11 @@ class SyntheticWeather:
     config: SyntheticWeatherConfig
 
     def irradiance_w_m2(self, t_s: float) -> float:
+        # `sunrise_s` and `sunset_s` are defined as seconds from midnight, so the
+        # clear-day irradiance curve should repeat every day.
+        t_day_s = t_s % SECONDS_PER_DAY
         return irradiance_clear_day_w_m2(
-            t_s,
+            t_day_s,
             sunrise_s=self.config.sunrise_s,
             sunset_s=self.config.sunset_s,
             peak_w_m2=self.config.peak_irradiance_w_m2,

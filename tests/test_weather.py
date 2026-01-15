@@ -53,6 +53,23 @@ def test_build_weather_synthetic() -> None:
     assert w.ambient_temperature_k(123.0) == 300.0
 
 
+def test_synthetic_irradiance_repeats_daily() -> None:
+    w = build_weather(
+        SyntheticWeatherConfig(
+            sunrise_s=10.0,
+            sunset_s=20.0,
+            peak_irradiance_w_m2=100.0,
+            ambient_mean_k=300.0,
+            ambient_amplitude_k=0.0,
+            ambient_period_s=86400.0,
+            ambient_peak_s=0.0,
+        )
+    )
+    t = 15.0
+    assert w.irradiance_w_m2(t) > 0.0
+    assert math.isclose(w.irradiance_w_m2(t), w.irradiance_w_m2(t + 86400.0))
+
+
 def test_build_weather_csv(tmp_path: Path) -> None:
     csv_path = tmp_path / "weather.csv"
     csv_path.write_text(

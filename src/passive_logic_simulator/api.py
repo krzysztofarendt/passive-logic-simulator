@@ -232,9 +232,130 @@ if _frontend_dist.exists():
         return FileResponse(_frontend_dist / "index.html")
 
     # Serve index.html for all non-API routes (SPA fallback)
+    # Block common scanner probes that look for sensitive files
+    _blocked_prefixes = (
+        # Version control / CI
+        ".git",
+        ".svn",
+        ".hg",
+        ".circleci",
+        ".github",
+        ".gitlab",
+        ".travis",
+        ".drone",
+        # Secrets / config
+        ".env",
+        ".aws",
+        ".ssh",
+        ".docker",
+        ".kube",
+        # WordPress
+        "wp-admin",
+        "wp-includes",
+        "wp-content",
+        "wordpress",
+        # Other CMS / admin panels
+        "admin",
+        "administrator",
+        "phpmyadmin",
+        "pma",
+        "myadmin",
+        "mysql",
+        "dbadmin",
+        "cgi-bin",
+        # Common attack paths
+        "backup",
+        "backups",
+        "dump",
+        "sql",
+        "db",
+        "database",
+        "temp",
+        "tmp",
+        "log",
+        "logs",
+        "debug",
+        "test",
+        "old",
+        "bak",
+    )
+    _blocked_suffixes = (
+        ".yml",
+        ".yaml",
+        ".toml",
+        ".ini",
+        ".cfg",
+        ".conf",
+        ".log",
+        ".sql",
+        ".bak",
+        ".swp",
+        ".php",
+        ".asp",
+        ".aspx",
+        ".jsp",
+    )
+    _blocked_files = {
+        # CI/CD
+        "Jenkinsfile",
+        "Dockerfile",
+        "docker-compose.yml",
+        "docker-compose.yaml",
+        "Makefile",
+        "Vagrantfile",
+        # Server config
+        ".htaccess",
+        ".htpasswd",
+        "web.config",
+        # App config
+        "config.php",
+        "settings.php",
+        "database.yml",
+        "secrets.yml",
+        "credentials.json",
+        "serviceAccountKey.json",
+        # WordPress
+        "wp-config.php",
+        "wp-login.php",
+        "wp-signup.php",
+        "wp-cron.php",
+        "xmlrpc.php",
+        "wp-links-opml.php",
+        "wp-trackback.php",
+        "license.txt",
+        "readme.html",
+        # Drupal
+        "install.php",
+        "update.php",
+        "cron.php",
+        # Other CMS
+        "configuration.php",
+        "LocalSettings.php",
+        "parameters.yml",
+    }
+
     @app.get("/{path:path}")
     def serve_spa(path: str) -> FileResponse:
         """Serve the SPA index.html for client-side routing."""
+        # Block suspicious paths that scanners probe for
+        path_lower = path.lower()
+        path_parts = path_lower.split("/")
+        first_part = path_parts[0] if path_parts else ""
+        filename_lower = path_parts[-1] if path_parts else ""
+        filename_orig = path.split("/")[-1] if path else ""
+
+        # Block paths starting with sensitive prefixes (case-insensitive)
+        if first_part.startswith(_blocked_prefixes):
+            raise HTTPException(status_code=404, detail="Not found")
+
+        # Block sensitive file extensions (case-insensitive)
+        if path_lower.endswith(_blocked_suffixes):
+            raise HTTPException(status_code=404, detail="Not found")
+
+        # Block known sensitive filenames (case-sensitive for exact matches)
+        if filename_orig in _blocked_files or filename_lower in _blocked_files:
+            raise HTTPException(status_code=404, detail="Not found")
+
         dist_root = _frontend_dist.resolve()
         requested_path = (dist_root / path).resolve()
         if requested_path.is_relative_to(dist_root) and requested_path.exists() and requested_path.is_file():
